@@ -1,0 +1,2 @@
+rootProject.name = "FirebaseGsocApp"
+include ':app'
