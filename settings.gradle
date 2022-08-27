@@ -1,2 +1,2 @@
-rootProject.name = "FirebaseGsocApp"
+rootProject.name = "EATapp"
 include ':app'
