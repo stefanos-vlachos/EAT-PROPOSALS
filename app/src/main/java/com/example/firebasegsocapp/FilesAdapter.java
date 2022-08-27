@@ -1,8 +1,10 @@
 package com.example.firebasegsocapp;
 
+import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.content.Context;
 
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,23 +47,39 @@ public class FilesAdapter extends
 
     @Override
     public void onBindViewHolder(@NonNull @NotNull ViewHolder holder, int position) {
+
         FirebaseFile firebaseFile = firebaseFiles.get(position);
 
-        // Set item views based on your views and data model
         TextView textView = holder.nameTextView;
         textView.setText(firebaseFile.getFileName());
         ImageView imageView = holder.imageView;
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(firebaseFile.getFilePath());
-                storageReference.getDownloadUrl().addOnSuccessListener(uri -> {
-                    String url = uri.toString();
-                    downloadFile(v.getContext(), firebaseFile.getFileName(), firebaseFile.getFileType(), DIRECTORY_DOWNLOADS, url);
-                }).addOnFailureListener(e -> {
-                    System.out.println("Error");
-                });
-
+                AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                builder.setMessage("Do you want to download this file?")
+                        .setCancelable(false)
+                        .setPositiveButton("Download", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(firebaseFile.getFilePath());
+                                storageReference.getDownloadUrl().addOnSuccessListener(uri -> {
+                                    String url = uri.toString();
+                                    downloadFile(v.getContext(), firebaseFile.getFileName(), firebaseFile.getFileType(), DIRECTORY_DOWNLOADS, url);
+                                }).addOnFailureListener(e -> {
+                                    System.out.println("Error");
+                                });
+                            }
+                        })
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.setTitle("Download File");
+                alert.show();
             }
         });
     }
