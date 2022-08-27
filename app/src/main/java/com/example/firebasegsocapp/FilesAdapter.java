@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -49,10 +50,8 @@ public class FilesAdapter extends
         // Set item views based on your views and data model
         TextView textView = holder.nameTextView;
         textView.setText(firebaseFile.getFileName());
-        Button button = holder.messageButton;
-        button.setText("Download file");
-        button.setEnabled(true);
-        button.setOnClickListener(new View.OnClickListener() {
+        ImageView imageView = holder.imageView;
+        imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(firebaseFile.getFilePath());
@@ -88,7 +87,7 @@ public class FilesAdapter extends
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
         public TextView nameTextView;
-        public Button messageButton;
+        public ImageView imageView;
 
         // We also create a constructor that accepts the entire item row
         // and does the view lookups to find each subview
@@ -97,8 +96,8 @@ public class FilesAdapter extends
             // to access the context from any ViewHolder instance.
             super(itemView);
 
-            nameTextView = (TextView) itemView.findViewById(R.id.contact_name);
-            messageButton = (Button) itemView.findViewById(R.id.message_button);
+            nameTextView = itemView.findViewById(R.id.txtName);
+            imageView = itemView.findViewById(R.id.imageView);
         }
     }
 

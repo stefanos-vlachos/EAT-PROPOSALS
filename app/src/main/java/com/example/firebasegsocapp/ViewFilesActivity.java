@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,8 +24,8 @@ public class ViewFilesActivity extends AppCompatActivity {
         Intent intent = getIntent();
         firebaseFiles = (ArrayList<FirebaseFile>) intent.getSerializableExtra("fileReferences");
 
-        RecyclerView rvFiles = (RecyclerView) findViewById(R.id.rvFiles);
-        rvFiles.setLayoutManager(new LinearLayoutManager(this));
+        RecyclerView rvFiles = findViewById(R.id.rvFiles);
+        rvFiles.setLayoutManager(new GridLayoutManager(this, 3));
         FilesAdapter adapter = new FilesAdapter(firebaseFiles);
         rvFiles.setAdapter(adapter);
 
