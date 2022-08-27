@@ -41,6 +41,9 @@
                   android:padding="6dp"
                   android:height="50dp"
                   android:textColor="@color/black"
+                  android:focusable="true"
+                  android:focusableInTouchMode="true"
+                  android:freezesText="true"
         />
 
     </LinearLayout>

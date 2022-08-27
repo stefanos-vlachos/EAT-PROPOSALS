@@ -51,7 +51,8 @@ public class FilesAdapter extends
         FirebaseFile firebaseFile = firebaseFiles.get(position);
 
         TextView textView = holder.nameTextView;
-        textView.setText(firebaseFile.getFileName());
+        textView.setText(firebaseFile.getFileName() + "." + firebaseFile.getFileType());
+        textView.setSelected(true);
         ImageView imageView = holder.imageView;
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
