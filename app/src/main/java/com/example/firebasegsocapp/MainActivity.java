@@ -51,6 +51,14 @@ public class MainActivity extends AppCompatActivity {
         content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
         learnMoreTxtView.setText(content);
 
+        loginTxtView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(intent);
+            }
+        });
+
         uploadButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
