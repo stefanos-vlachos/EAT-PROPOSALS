@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     Button uploadButton;
     Button viewButton;
     TextView learnMoreTxtView;
+    TextView loginTxtView;
     Uri pdfUri = null;
     StorageReference storageReference;
     ArrayList<FirebaseFile> fileReferences;
@@ -44,10 +45,11 @@ public class MainActivity extends AppCompatActivity {
         uploadButton = findViewById(R.id.uploadButton);
         viewButton = findViewById(R.id.viewButton);
         learnMoreTxtView = findViewById(R.id.txtViewLearnMore);
+        loginTxtView = findViewById(R.id.loginTxtView);
+
         SpannableString content = new SpannableString("Learn More");
         content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
         learnMoreTxtView.setText(content);
-
 
         uploadButton.setOnClickListener(new View.OnClickListener() {
 
