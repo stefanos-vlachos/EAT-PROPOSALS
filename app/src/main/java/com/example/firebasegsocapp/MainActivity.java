@@ -5,29 +5,30 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.provider.OpenableColumns;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import com.google.android.gms.tasks.*;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.*;
+import com.smarteist.autoimageslider.SliderView;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledExecutorService;
+
 
 public class MainActivity extends AppCompatActivity {
 
     Button uploadButton;
     Button viewButton;
+    TextView learnMoreTxtView;
     Uri pdfUri = null;
     StorageReference storageReference;
     ArrayList<FirebaseFile> fileReferences;
@@ -42,6 +43,11 @@ public class MainActivity extends AppCompatActivity {
 
         uploadButton = findViewById(R.id.uploadButton);
         viewButton = findViewById(R.id.viewButton);
+        learnMoreTxtView = findViewById(R.id.txtViewLearnMore);
+        SpannableString content = new SpannableString("Learn More");
+        content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
+        learnMoreTxtView.setText(content);
+
 
         uploadButton.setOnClickListener(new View.OnClickListener() {
 
@@ -81,6 +87,41 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         });
+
+        // we are creating array list for storing our image urls.
+        ArrayList<SliderData> sliderDataArrayList = new ArrayList<>();
+
+        // initializing the slider view.
+        SliderView sliderView = findViewById(R.id.slider);
+
+        // adding the urls inside array list
+        sliderDataArrayList.add(new SliderData("\"EAT is an additional JBOSS testsuite.\"", getResources().getIdentifier(getPackageName()+":drawable/image1", null, null)));
+        sliderDataArrayList.add(new SliderData("\"Write your tests once and run them against any version of EAP and WILDFLY application server.\"", getResources().getIdentifier(getPackageName()+":drawable/image2", null, null)));
+        sliderDataArrayList.add(new SliderData("\"Use this app to view files related to EAT.\"", getResources().getIdentifier(getPackageName()+":drawable/image3", null, null)));
+        sliderDataArrayList.add(new SliderData("\"You can also upload new files.\"", getResources().getIdentifier(getPackageName()+":drawable/image4", null, null)));
+
+
+        // passing this array list inside our adapter class.
+        SliderAdapter adapter = new SliderAdapter(this, sliderDataArrayList);
+
+        // below method is used to set auto cycle direction in left to
+        // right direction you can change according to requirement.
+        sliderView.setAutoCycleDirection(SliderView.LAYOUT_DIRECTION_LTR);
+
+        // below method is used to
+        // setadapter to sliderview.
+        sliderView.setSliderAdapter(adapter);
+
+        // below method is use to set
+        // scroll time in seconds.
+        sliderView.setScrollTimeInSec(5);
+
+        // to set it scrollable automatically
+        // we use below method.
+        sliderView.setAutoCycle(true);
+
+        // to start autocycle below method is used.
+        sliderView.startAutoCycle();
     }
 
     @Override

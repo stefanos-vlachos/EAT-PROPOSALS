@@ -1,20 +1,121 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
         android:orientation="vertical"
-        tools:context=".MainActivity">
+        tools:context=".MainActivity"
+>
 
-    <Button
-            android:text="Upload a file"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:id="@+id/uploadButton"/>
-    <Button
-            android:text="view files"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:id="@+id/viewButton"/>
+    <RelativeLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#22223B"
+            android:id="@+id/header"
+            android:layout_weight="1"
+    >
+        <TextView
+                android:text="EAT-app"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/textView3"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="20dp" android:textColor="@color/black" android:textStyle="bold"/>
+        <Button
+                android:text="Login"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/button2"
+                style="@style/Widget.AppCompat.Button.Small"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="20dp"
+        />
+    </RelativeLayout>
+
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:context=".MainActivity"
+            android:id="@+id/slideshow"
+            android:layout_weight="100"
+    >
+        <TextView
+                android:text="Welcome to the EAT-app."
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/textView4" android:textColor="@color/black"
+                android:textSize="24sp"
+                android:layout_above="@id/slider"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="30dp"
+        />
+
+        <com.smarteist.autoimageslider.SliderView
+                android:id="@+id/slider"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                app:sliderAnimationDuration="600"
+                android:layout_centerInParent="true"
+                app:sliderAutoCycleDirection="right"
+                app:sliderIndicatorAnimationDuration="600"
+                app:sliderIndicatorEnabled="true"
+                app:sliderIndicatorGravity="center_horizontal|bottom"
+                app:sliderIndicatorMargin="15dp"
+                app:sliderIndicatorOrientation="horizontal"
+                app:sliderIndicatorPadding="3dp"
+                app:sliderIndicatorRadius="2dp"
+                app:sliderIndicatorSelectedColor="#22223B"
+                app:sliderIndicatorUnselectedColor="#F2E9E4"
+                app:sliderScrollTimeInSec="1"
+        >
+        </com.smarteist.autoimageslider.SliderView>
+
+        <TextView
+                android:text=""
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtViewLearnMore"
+                android:layout_below="@id/slider"
+                android:layout_marginTop="25dp"
+                android:layout_centerHorizontal="true"
+        />
+
+    </RelativeLayout>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:background="#22223B"
+            android:id="@+id/footer"
+    >
+
+        <GridLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:rowCount="1"
+                android:columnCount="2"
+                android:useDefaultMargins="true"
+        >
+            <Button
+                    android:text="view files"
+                    android:layout_width="90dp"
+                    android:layout_height="wrap_content" android:id="@+id/viewButton"
+                    android:layout_column="0"
+                    android:layout_row="0"
+            />
+            <Button
+                    android:text="Upload a file"
+                    android:layout_width="90dp"
+                    android:layout_height="wrap_content" android:id="@+id/uploadButton"
+                    android:layout_column="1"
+                    android:layout_row="0"
+            />
+        </GridLayout>
+    </LinearLayout>
+
 
 </LinearLayout>
