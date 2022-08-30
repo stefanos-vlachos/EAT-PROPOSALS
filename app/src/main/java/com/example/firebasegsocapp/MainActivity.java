@@ -136,6 +136,14 @@ public class MainActivity extends AppCompatActivity {
                         });
             }
         });
+
+        txtViewLearnMore.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), LearnMoreActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void configureSlideshow(){
