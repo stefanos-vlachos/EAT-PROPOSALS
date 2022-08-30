@@ -16,20 +16,19 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import org.jetbrains.annotations.NotNull;
 
 public class LoginActivity extends AppCompatActivity {
 
-    EditText edtTextUsername;
+    EditText edtTextEmail;
     EditText edtTextPassword;
-    Button btnLogin;
-    TextView txtViewCreateAccount;
-    TextView txtViewErrorLogin;
-    TextView txtViewCancelLogin;
-    TextView loginHeaderTxtView;
+    Button btnAuth;
+    TextView txtViewAltMethod;
+    TextView txtViewErrorAuth;
+    TextView txtViewCancelAuth;
+    TextView txtViewAuthHeader;
     TextView txtViewShowPassword;
-    //FirebaseAuth mAuth;
+    FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,31 +39,34 @@ public class LoginActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         String activityType = intent.getStringExtra("type");
-        setActivityState(activityType);
-
+        refreshActivityState(activityType);
     }
 
     private void init() {
-        edtTextUsername = findViewById(R.id.userNameEdtText);
+        firebaseAuth = MainActivity.getFirebaseAuth();
+        edtTextEmail = findViewById(R.id.edtTextEmail);
         edtTextPassword = findViewById(R.id.edtTextPassword);
-        btnLogin = findViewById(R.id.buttonLogin);
-        txtViewCreateAccount = findViewById(R.id.txtViewCreateAccount);
-        txtViewErrorLogin = findViewById(R.id.txtViewErrorLogin);
-        txtViewCancelLogin = findViewById(R.id.txtViewCancelLogin);
-        loginHeaderTxtView = findViewById(R.id.loginHeaderTxtView);
+        btnAuth = findViewById(R.id.buttonAuth);
+        txtViewAltMethod = findViewById(R.id.txtViewAltMethod);
+        txtViewErrorAuth = findViewById(R.id.txtViewErrorAuth);
+        txtViewCancelAuth = findViewById(R.id.txtViewCancelAuth);
+        txtViewAuthHeader = findViewById(R.id.txtViewAuthHeader);
         txtViewShowPassword = findViewById(R.id.txtViewShowPassword);
     }
 
-    private void setActivityState(String activityType) {
-        txtViewErrorLogin.setText("");
-        edtTextUsername.setText("");
+    private void refreshActivityState(String activityType) {
+        //Reset fields
+        edtTextEmail.setText("");
         edtTextPassword.setText("");
+
         if(txtViewShowPassword.getText().equals("HIDE")){
             edtTextPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
             txtViewShowPassword.setText("SHOW");
         }
 
-        txtViewCancelLogin.setOnClickListener(new View.OnClickListener() {
+        txtViewErrorAuth.setText("");
+
+        txtViewCancelAuth.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
@@ -82,68 +84,63 @@ public class LoginActivity extends AppCompatActivity {
                     edtTextPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
                     txtViewShowPassword.setText("SHOW");
                 }
-
-
             }
         });
 
+        //Choose between Login and Profile Creation
         if (activityType.equals("login")) {
-            loginHeaderTxtView.setText("Login");
-            btnLogin.setText("Login");
-            txtViewCreateAccount.setText("New user?\nCreate an account.");
-
-            btnLogin.setOnClickListener(new View.OnClickListener() {
+            txtViewAuthHeader.setText("Login");
+            btnAuth.setText("Login");
+            btnAuth.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String username = edtTextUsername.getText().toString();
+                    String username = edtTextEmail.getText().toString();
                     String password = edtTextPassword.getText().toString();
                     if(checkEmptyInput(username, password))
                         signIn(username, password);
                 }
             });
-
-            txtViewCreateAccount.setOnClickListener(new View.OnClickListener() {
+            txtViewAltMethod.setText("New user?\nCreate an account.");
+            txtViewAltMethod.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    setActivityState("create");
+                    refreshActivityState("create");
                 }
             });
 
             return;
         }
 
-        loginHeaderTxtView.setText("Create new account");
-        btnLogin.setText("Create account");
-        txtViewCreateAccount.setText("Already have an account?\nSign in.");
-
-        btnLogin.setOnClickListener(new View.OnClickListener() {
+        txtViewAuthHeader.setText("Create new account");
+        btnAuth.setText("Create account");
+        btnAuth.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String username = edtTextUsername.getText().toString();
+                String username = edtTextEmail.getText().toString();
                 String password = edtTextPassword.getText().toString();
                 if(checkEmptyInput(username, password))
                     createAccount(username, password);
             }
         });
-
-        txtViewCreateAccount.setOnClickListener(new View.OnClickListener() {
+        txtViewAltMethod.setText("Already have an account?\nSign in.");
+        txtViewAltMethod.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setActivityState("login");
+                refreshActivityState("login");
             }
         });
     }
 
     private boolean checkEmptyInput (String username, String password) {
         if(TextUtils.isEmpty(username) || TextUtils.isEmpty(password)){
-            txtViewErrorLogin.setText("Username and Password can not be empty.");
+            txtViewErrorAuth.setText("Username and Password can not be empty.");
             return false;
         }
         return true;
     }
 
     private void createAccount (String email, String password) {
-        MainActivity.FIREBASE_AUTH.createUserWithEmailAndPassword(email, password).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
+        firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull @NotNull Task<AuthResult> task) {
                 if(task.isSuccessful()) {
@@ -152,14 +149,14 @@ public class LoginActivity extends AppCompatActivity {
                     finish();
                 }
                 else {
-                    txtViewErrorLogin.setText(task.getException().getMessage());
+                    txtViewErrorAuth.setText(task.getException().getMessage());
                 }
             }
         });
     }
 
     private void signIn(String email, String password) {
-        MainActivity.FIREBASE_AUTH.signInWithEmailAndPassword(email, password)
+        firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -168,7 +165,7 @@ public class LoginActivity extends AppCompatActivity {
                             setResult(Activity.RESULT_OK,returnIntent);
                             finish();
                         } else
-                            txtViewErrorLogin.setText(task.getException().getMessage());
+                            txtViewErrorAuth.setText(task.getException().getMessage());
                     }
                 });
     }

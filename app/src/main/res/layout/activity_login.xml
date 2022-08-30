@@ -30,7 +30,7 @@
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/txtViewCancelLogin"
+                android:id="@+id/txtViewCancelAuth"
                 android:layout_alignParentEnd="true"
                 android:layout_marginEnd="20dp"
                 android:textColor="@color/white"
@@ -45,9 +45,8 @@
             android:layout_height="match_parent"
     >
 
-        <!--text view for heading-->
         <TextView
-                android:id="@+id/loginHeaderTxtView"
+                android:id="@+id/txtViewAuthHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="100dp"
@@ -55,21 +54,21 @@
                 android:padding="5dp"
                 android:text="Login"
                 android:textAlignment="center"
-                android:textColor="@color/purple_700"
+                android:textColor="@color/oxford_blue"
                 android:textSize="20sp"
                 android:textStyle="bold"
         />
 
         <!--edit text for user name-->
         <EditText
-                android:id="@+id/userNameEdtText"
+                android:id="@+id/edtTextEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/loginHeaderTxtView"
+                android:layout_below="@id/txtViewAuthHeader"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="50dp"
                 android:layout_marginEnd="10dp"
-                android:hint="Enter Username"
+                android:hint="Enter E-mail"
                 android:inputType="textEmailAddress"
         />
 
@@ -80,7 +79,7 @@
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="20dp"
                 android:layout_marginEnd="10dp"
-                android:layout_below="@id/userNameEdtText"
+                android:layout_below="@+id/edtTextEmail"
                 android:id="@+id/edtTextPasswordLayout"
         >
             <EditText
@@ -105,7 +104,7 @@
 
 
         <Button
-                android:id="@+id/buttonLogin"
+                android:id="@+id/buttonAuth"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/edtTextPasswordLayout"
@@ -113,13 +112,16 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginEnd="10dp"
                 android:text="Login"
-                android:textAllCaps="false" />
+                android:textAllCaps="false"
+                android:backgroundTint="@color/oxford_blue"
+                android:textColor="@color/cultured"
+        />
 
         <TextView
-                android:id="@+id/txtViewCreateAccount"
+                android:id="@+id/txtViewAltMethod"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/buttonLogin"
+                android:layout_below="@+id/buttonAuth"
                 android:layout_marginTop="30dp"
                 android:layout_centerHorizontal="true"
                 android:text="New user?\nCreate an account."
@@ -128,11 +130,11 @@
         />
 
         <TextView
-                android:id="@+id/txtViewErrorLogin"
+                android:id="@+id/txtViewErrorAuth"
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 android:textColor="#880808"
-                android:layout_below="@+id/txtViewCreateAccount"
+                android:layout_below="@+id/txtViewAltMethod"
                 android:layout_marginTop="30dp"
                 android:layout_centerHorizontal="true"
                 android:textAlignment="center"

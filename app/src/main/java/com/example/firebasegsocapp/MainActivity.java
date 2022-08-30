@@ -18,7 +18,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import com.google.android.gms.tasks.*;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.*;
 import com.smarteist.autoimageslider.SliderView;
 import org.jetbrains.annotations.NotNull;
@@ -28,17 +27,21 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button uploadButton;
-    Button viewButton;
-    TextView learnMoreTxtView;
-    TextView loginTxtView;
+    private final int REGISTER_ACTIVITY_CODE = 1;
+    private final int UPLOAD_FILES_ACTIVITY_CODE = 2;
+    public static FirebaseAuth FIREBASE_AUTH = FirebaseAuth.getInstance();
+
+    Button btnUploadFile;
+    Button btnViewFiles;
+    TextView txtViewLearnMore;
+    TextView txtViewLogin;
     Uri pdfUri;
     StorageReference storageReference;
     ArrayList<FirebaseFile> fileReferences;
 
-    public static FirebaseAuth FIREBASE_AUTH = FirebaseAuth.getInstance();
-    final int REGISTER_ACTIVITY_CODE = 1;
-    final int UPLOAD_FILES_ACTIVITY_CODE = 2;
+    public static FirebaseAuth getFirebaseAuth() {
+        return FIREBASE_AUTH;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         init();
-        setRegisterDependentElements();
+        updateRegisterDependentElements();
         setListeners();
         configureSlideshow();
     }
@@ -55,29 +58,28 @@ public class MainActivity extends AppCompatActivity {
         storageReference = FirebaseStorage.getInstance().getReference();
         fileReferences =  new ArrayList<>();
 
-        uploadButton = findViewById(R.id.uploadButton);
-        viewButton = findViewById(R.id.viewButton);
-        learnMoreTxtView = findViewById(R.id.txtViewLearnMore);
-        loginTxtView = findViewById(R.id.loginTxtView);
-
+        txtViewLogin = findViewById(R.id.txtViewLogin);
+        btnUploadFile = findViewById(R.id.btnUploadFile);
+        btnViewFiles = findViewById(R.id.btnViewFiles);
+        txtViewLearnMore = findViewById(R.id.txtViewLearnMore);
         SpannableString content = new SpannableString("Learn More");
         content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
-        learnMoreTxtView.setText(content);
+        txtViewLearnMore.setText(content);
     }
 
-    private void setRegisterDependentElements() {
-        if(FIREBASE_AUTH.getCurrentUser()!=null){
-            loginTxtView.setText(FIREBASE_AUTH.getCurrentUser().getEmail());
-            loginTxtView.setOnClickListener(new View.OnClickListener() {
+    private void updateRegisterDependentElements() {
+        if(getFirebaseAuth().getCurrentUser()!=null){
+            txtViewLogin.setText("Logout");
+            txtViewLogin.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     FIREBASE_AUTH.signOut();
-                    setRegisterDependentElements();
+                    updateRegisterDependentElements();
                 }
             });
         } else {
-            loginTxtView.setText("Sign Up | Sign In");
-            loginTxtView.setOnClickListener(new View.OnClickListener() {
+            txtViewLogin.setText("Sign Up | Sign In");
+            txtViewLogin.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
@@ -89,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setListeners() {
-        uploadButton.setOnClickListener(new View.OnClickListener() {
+        btnUploadFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent;
@@ -107,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        viewButton.setOnClickListener(new View.OnClickListener() {
+        btnViewFiles.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 storageReference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
@@ -137,30 +139,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void configureSlideshow(){
-        // we are creating array list for storing our image urls.
         ArrayList<SliderData> sliderDataArrayList = new ArrayList<>();
-        // initializing the slider view.
+
         SliderView sliderView = findViewById(R.id.slider);
-        // adding the urls inside array list
-        sliderDataArrayList.add(new SliderData("\"EAT is an additional JBOSS testsuite.\"", getResources().getIdentifier(getPackageName()+":drawable/image1", null, null)));
-        sliderDataArrayList.add(new SliderData("\"Write your tests once and run them against any version of EAP and WILDFLY application server.\"", getResources().getIdentifier(getPackageName()+":drawable/image2", null, null)));
-        sliderDataArrayList.add(new SliderData("\"Use this app to view files related to EAT.\"", getResources().getIdentifier(getPackageName()+":drawable/image3", null, null)));
-        sliderDataArrayList.add(new SliderData("\"You can also upload new files.\"", getResources().getIdentifier(getPackageName()+":drawable/image4", null, null)));
-        // passing this array list inside our adapter class.
+
+        sliderDataArrayList.add(new SliderData("\"EAT is an additional JBOSS testsuite.\"",
+                getResources().getIdentifier(getPackageName()+":drawable/image1", null, null)));
+        sliderDataArrayList.add(new SliderData("\"Write your tests once and run them against any version of EAP and WILDFLY application server.\"",
+                getResources().getIdentifier(getPackageName()+":drawable/image2", null, null)));
+        sliderDataArrayList.add(new SliderData("\"Use this app to view files related to EAT.\"",
+                getResources().getIdentifier(getPackageName()+":drawable/image3", null, null)));
+        sliderDataArrayList.add(new SliderData("\"You can also upload new files.\"",
+                getResources().getIdentifier(getPackageName()+":drawable/image4", null, null)));
+
         SliderAdapter adapter = new SliderAdapter(this, sliderDataArrayList);
-        // below method is used to set auto cycle direction in left to
-        // right direction you can change according to requirement.
+
         sliderView.setAutoCycleDirection(SliderView.LAYOUT_DIRECTION_LTR);
-        // below method is used to
-        // setadapter to sliderview.
+
         sliderView.setSliderAdapter(adapter);
-        // below method is use to set
-        // scroll time in seconds.
+
         sliderView.setScrollTimeInSec(5);
-        // to set it scrollable automatically
-        // we use below method.
+
         sliderView.setAutoCycle(true);
-        // to start autocycle below method is used.
+
         sliderView.startAutoCycle();
     }
 
@@ -179,8 +180,6 @@ public class MainActivity extends AppCompatActivity {
                     progressDialog.show();
 
                     StorageReference reference = storageReference.child(fileName + ".pdf");
-                    Toast.makeText(MainActivity.this, reference.getName(), Toast.LENGTH_SHORT).show();
-
                     reference.putFile(pdfUri)
                             .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                 @Override
@@ -201,15 +200,16 @@ public class MainActivity extends AppCompatActivity {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
                                     progressDialog.dismiss();
-                                    Toast.makeText(MainActivity.this, "Failed", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(MainActivity.this, "File upload failed.Try again", Toast.LENGTH_SHORT).show();
                                 }
                             });
                 }
                 break;
+
             case REGISTER_ACTIVITY_CODE:
-                if(resultCode == RESULT_OK) {
-                    setRegisterDependentElements();
-                }
+                if(resultCode == RESULT_OK)
+                    updateRegisterDependentElements();
+                break;
         }
     }
 

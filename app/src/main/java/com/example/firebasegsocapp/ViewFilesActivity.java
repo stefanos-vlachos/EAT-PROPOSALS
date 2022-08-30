@@ -2,11 +2,8 @@ package com.example.firebasegsocapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -28,7 +25,6 @@ public class ViewFilesActivity extends AppCompatActivity {
         rvFiles.setLayoutManager(new GridLayoutManager(this, 3));
         FilesAdapter adapter = new FilesAdapter(firebaseFiles);
         rvFiles.setAdapter(adapter);
-
     }
 
 }
