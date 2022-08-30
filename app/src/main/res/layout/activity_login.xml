@@ -30,13 +30,13 @@
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/loginTxtView"
+                android:id="@+id/txtViewCancelLogin"
                 android:layout_alignParentEnd="true"
                 android:layout_marginEnd="20dp"
                 android:textColor="@color/white"
                 android:layout_centerVertical="true"
                 android:textSize="14sp"
-                android:text="Sign Up | Sign In"
+                android:text="Cancel"
         />
     </RelativeLayout>
 
@@ -74,66 +74,68 @@
         />
 
         <!--edit text for user password-->
-        <EditText
-                android:id="@+id/edtTextPassword"
+        <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/userNameEdtText"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="20dp"
                 android:layout_marginEnd="10dp"
-                android:hint="Enter Password"
-                android:inputType="textPassword"
-        />
+                android:layout_below="@id/userNameEdtText"
+                android:id="@+id/edtTextPasswordLayout"
+        >
+            <EditText
+                    android:id="@+id/edtTextPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter Password"
+                    android:inputType="textPassword"
+                    android:layout_toLeftOf="@+id/txtViewShowPassword"
+            />
+
+            <TextView
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/txtViewShowPassword"
+                    android:text="SHOW"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="3dp"
+            />
+        </RelativeLayout>
+
 
         <Button
                 android:id="@+id/buttonLogin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/edtTextPassword"
+                android:layout_below="@id/edtTextPasswordLayout"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="20dp"
                 android:layout_marginEnd="10dp"
                 android:text="Login"
                 android:textAllCaps="false" />
 
-        <LinearLayout
-                android:id="@+id/layoutAdditionalOptions"
+        <TextView
+                android:id="@+id/txtViewCreateAccount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_below="@+id/buttonLogin"
                 android:layout_marginTop="30dp"
                 android:layout_centerHorizontal="true"
-        >
-            <TextView
-                    android:id="@+id/txtViewCreateAccount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Create an account"
-                    android:textColor="@color/black"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginRight="30dp"
-            />
-
-            <TextView
-                    android:id="@+id/txtViewCancelLogin"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Cancel"
-                    android:textColor="@color/black"
-                    android:layout_centerHorizontal="true"/>
-
-        </LinearLayout>
+                android:text="New user?\nCreate an account."
+                android:textAlignment="center"
+                android:textColor="@color/black"
+        />
 
         <TextView
                 android:id="@+id/txtViewErrorLogin"
-                android:layout_width="wrap_content"
+                android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 android:textColor="#880808"
-                android:layout_below="@+id/layoutAdditionalOptions"
+                android:layout_below="@+id/txtViewCreateAccount"
                 android:layout_marginTop="30dp"
                 android:layout_centerHorizontal="true"
+                android:textAlignment="center"
         />
 
     </RelativeLayout>

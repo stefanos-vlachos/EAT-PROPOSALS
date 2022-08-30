@@ -17,6 +17,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import com.google.android.gms.tasks.*;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.*;
 import com.smarteist.autoimageslider.SliderView;
 import org.jetbrains.annotations.NotNull;
@@ -30,15 +32,26 @@ public class MainActivity extends AppCompatActivity {
     Button viewButton;
     TextView learnMoreTxtView;
     TextView loginTxtView;
-    Uri pdfUri = null;
+    Uri pdfUri;
     StorageReference storageReference;
     ArrayList<FirebaseFile> fileReferences;
+
+    public static FirebaseAuth FIREBASE_AUTH = FirebaseAuth.getInstance();
+    final int REGISTER_ACTIVITY_CODE = 1;
+    final int UPLOAD_FILES_ACTIVITY_CODE = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        init();
+        setRegisterDependentElements();
+        setListeners();
+        configureSlideshow();
+    }
+
+    private void init() {
         storageReference = FirebaseStorage.getInstance().getReference();
         fileReferences =  new ArrayList<>();
 
@@ -50,23 +63,47 @@ public class MainActivity extends AppCompatActivity {
         SpannableString content = new SpannableString("Learn More");
         content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
         learnMoreTxtView.setText(content);
+    }
 
-        loginTxtView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(intent);
-            }
-        });
+    private void setRegisterDependentElements() {
+        if(FIREBASE_AUTH.getCurrentUser()!=null){
+            loginTxtView.setText(FIREBASE_AUTH.getCurrentUser().getEmail());
+            loginTxtView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    FIREBASE_AUTH.signOut();
+                    setRegisterDependentElements();
+                }
+            });
+        } else {
+            loginTxtView.setText("Sign Up | Sign In");
+            loginTxtView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                    intent.putExtra("type", "login");
+                    startActivityForResult(intent, REGISTER_ACTIVITY_CODE);
+                }
+            });
+        }
+    }
 
+    private void setListeners() {
         uploadButton.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setType("application/pdf");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Document"), 12);
+                Intent intent;
+                if(FIREBASE_AUTH.getCurrentUser()!=null){
+                    intent = new Intent();
+                    intent.setType("application/pdf");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(Intent.createChooser(intent, "Select Document"), UPLOAD_FILES_ACTIVITY_CODE);
+                }
+                else{
+                    intent = new Intent(getApplicationContext(), LoginActivity.class);
+                    intent.putExtra("type", "login");
+                    startActivityForResult(intent, REGISTER_ACTIVITY_CODE);
+                }
             }
         });
 
@@ -74,62 +111,55 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 storageReference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
-                    @Override
-                    public void onSuccess(ListResult listResult) {
-                        for(StorageReference fileReference : listResult.getItems()) {
-                            String filePath = fileReference.getPath();
-                            int cut = filePath.lastIndexOf(".");
-                            String fileName = filePath.substring(1,cut);
-                            String fileType = filePath.substring(cut+1);
-                            fileReferences.add(new FirebaseFile(filePath, fileName, fileType));
-                        }
+                            @Override
+                            public void onSuccess(ListResult listResult) {
+                                for(StorageReference fileReference : listResult.getItems()) {
+                                    String filePath = fileReference.getPath();
+                                    int cut = filePath.lastIndexOf(".");
+                                    String fileName = filePath.substring(1,cut);
+                                    String fileType = filePath.substring(cut+1);
+                                    fileReferences.add(new FirebaseFile(filePath, fileName, fileType));
+                                }
 
-                        Intent intent = new Intent(getApplicationContext(), ViewFilesActivity.class);
-                        intent.putExtra("fileReferences", fileReferences);
-                        startActivity(intent);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull @NotNull Exception e) {
-                        Toast.makeText(MainActivity.this, "Process failed.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                                Intent intent = new Intent(getApplicationContext(), ViewFilesActivity.class);
+                                intent.putExtra("fileReferences", fileReferences);
+                                startActivity(intent);
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull @NotNull Exception e) {
+                                Toast.makeText(MainActivity.this, "Process failed.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
             }
         });
+    }
 
+    private void configureSlideshow(){
         // we are creating array list for storing our image urls.
         ArrayList<SliderData> sliderDataArrayList = new ArrayList<>();
-
         // initializing the slider view.
         SliderView sliderView = findViewById(R.id.slider);
-
         // adding the urls inside array list
         sliderDataArrayList.add(new SliderData("\"EAT is an additional JBOSS testsuite.\"", getResources().getIdentifier(getPackageName()+":drawable/image1", null, null)));
         sliderDataArrayList.add(new SliderData("\"Write your tests once and run them against any version of EAP and WILDFLY application server.\"", getResources().getIdentifier(getPackageName()+":drawable/image2", null, null)));
         sliderDataArrayList.add(new SliderData("\"Use this app to view files related to EAT.\"", getResources().getIdentifier(getPackageName()+":drawable/image3", null, null)));
         sliderDataArrayList.add(new SliderData("\"You can also upload new files.\"", getResources().getIdentifier(getPackageName()+":drawable/image4", null, null)));
-
-
         // passing this array list inside our adapter class.
         SliderAdapter adapter = new SliderAdapter(this, sliderDataArrayList);
-
         // below method is used to set auto cycle direction in left to
         // right direction you can change according to requirement.
         sliderView.setAutoCycleDirection(SliderView.LAYOUT_DIRECTION_LTR);
-
         // below method is used to
         // setadapter to sliderview.
         sliderView.setSliderAdapter(adapter);
-
         // below method is use to set
         // scroll time in seconds.
         sliderView.setScrollTimeInSec(5);
-
         // to set it scrollable automatically
         // we use below method.
         sliderView.setAutoCycle(true);
-
         // to start autocycle below method is used.
         sliderView.startAutoCycle();
     }
@@ -137,49 +167,55 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode == RESULT_OK && data.getData()!=null) {
+        switch (requestCode){
+            case UPLOAD_FILES_ACTIVITY_CODE:
+                if(resultCode == RESULT_OK && data.getData()!=null) {
+                    pdfUri = data.getData();
+                    String fileName = getFileName(pdfUri);
+                    Toast.makeText(this, fileName, Toast.LENGTH_SHORT).show();
 
-            pdfUri = data.getData();
-            String fileName = getFileName(pdfUri);
-            Toast.makeText(this, fileName, Toast.LENGTH_SHORT).show();
+                    final ProgressDialog progressDialog = new ProgressDialog(this);
+                    progressDialog.setMessage("Uploading");
+                    progressDialog.show();
 
-            final ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setMessage("Uploading");
-            progressDialog.show();
+                    StorageReference reference = storageReference.child(fileName + ".pdf");
+                    Toast.makeText(MainActivity.this, reference.getName(), Toast.LENGTH_SHORT).show();
 
-            StorageReference reference = storageReference.child(fileName + ".pdf");
-            Toast.makeText(MainActivity.this, reference.getName(), Toast.LENGTH_SHORT).show();
-
-            reference.putFile(pdfUri)
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        progressDialog.dismiss();
-                        Toast.makeText(MainActivity.this, "Uploaded Succesfully", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
-                        double progress = (100.0 * taskSnapshot.getBytesTransferred() )/ taskSnapshot
-                                .getTotalByteCount();
-                        progressDialog.setMessage("Uploaded " + (int) progress + "%");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        progressDialog.dismiss();
-                        Toast.makeText(MainActivity.this, "Failed", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                    reference.putFile(pdfUri)
+                            .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                    progressDialog.dismiss();
+                                    Toast.makeText(MainActivity.this, "Uploaded Succesfully", Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
+                                    double progress = (100.0 * taskSnapshot.getBytesTransferred() )/ taskSnapshot
+                                            .getTotalByteCount();
+                                    progressDialog.setMessage("Uploaded " + (int) progress + "%");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    progressDialog.dismiss();
+                                    Toast.makeText(MainActivity.this, "Failed", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                }
+                break;
+            case REGISTER_ACTIVITY_CODE:
+                if(resultCode == RESULT_OK) {
+                    setRegisterDependentElements();
+                }
         }
     }
 
     //method to compose the name of the uploaded files
     @SuppressLint("Range")
     private String getFileName(Uri fileUri) {
-
         String fileName = null;
         int cut;
 
