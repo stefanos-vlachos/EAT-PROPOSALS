@@ -17,31 +17,31 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.FirebaseGsocApp">
         <activity
-                android:name=".LearnMoreActivity"
-                android:parentActivityName=".MainActivity"
+                android:name=".activity.LearnMoreActivity"
+                android:parentActivityName=".activity.MainActivity"
                 android:exported="true">
             <meta-data
                     android:name="android:support:PARENT_ACTIVITY"
                     android:value=".MainActivity" />
         </activity>
         <activity
-                android:name=".ViewFilesActivity"
-                android:parentActivityName=".MainActivity"
+                android:name=".activity.ViewFilesActivity"
+                android:parentActivityName=".activity.MainActivity"
                 android:exported="true">
                 <meta-data
                         android:name="android:support:PARENT_ACTIVITY"
                         android:value=".MainActivity" />
         </activity>
         <activity
-                android:name=".LoginActivity"
-                android:parentActivityName=".MainActivity"
+                android:name=".activity.LoginActivity"
+                android:parentActivityName=".activity.MainActivity"
                 android:exported="true">
             <meta-data
                     android:name="android:support:PARENT_ACTIVITY"
                     android:value=".MainActivity" />
         </activity>
         <activity
-                android:name=".MainActivity"
+                android:name=".activity.MainActivity"
                 android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

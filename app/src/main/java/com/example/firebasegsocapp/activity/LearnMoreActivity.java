@@ -1,8 +1,9 @@
-package com.example.firebasegsocapp;
+package com.example.firebasegsocapp.activity;
 
 import android.os.Bundle;
 import android.webkit.WebView;
 import androidx.appcompat.app.AppCompatActivity;
+import com.example.firebasegsocapp.R;
 
 
 public class LearnMoreActivity extends AppCompatActivity {

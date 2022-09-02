@@ -1,4 +1,4 @@
-package com.example.firebasegsocapp;
+package com.example.firebasegsocapp.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -6,7 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+import com.example.firebasegsocapp.R;
+import com.example.firebasegsocapp.SliderData;
 import com.smarteist.autoimageslider.SliderViewAdapter;
 
 import java.util.ArrayList;

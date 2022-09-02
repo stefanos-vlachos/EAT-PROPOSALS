@@ -1,4 +1,4 @@
-package com.example.firebasegsocapp;
+package com.example.firebasegsocapp.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,17 +6,22 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import com.example.firebasegsocapp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import org.jetbrains.annotations.NotNull;
+
+import static android.content.ContentValues.TAG;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -30,6 +35,10 @@ public class LoginActivity extends AppCompatActivity {
     TextView txtViewShowPassword;
     FirebaseAuth firebaseAuth;
 
+    private static final int REQ_ONE_TAP = 2;  // Can be any integer unique to the Activity.
+    private boolean showOneTapUI = true;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +49,7 @@ public class LoginActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String activityType = intent.getStringExtra("type");
         refreshActivityState(activityType);
+
     }
 
     private void init() {
@@ -140,10 +150,12 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void createAccount (String email, String password) {
+
         firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull @NotNull Task<AuthResult> task) {
                 if(task.isSuccessful()) {
+                    sendEmailVerification();
                     Intent returnIntent = new Intent();
                     setResult(Activity.RESULT_OK,returnIntent);
                     finish();
@@ -161,11 +173,26 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
+                            sendEmailVerification();
                             Intent returnIntent = new Intent();
                             setResult(Activity.RESULT_OK,returnIntent);
                             finish();
                         } else
                             txtViewErrorAuth.setText(task.getException().getMessage());
+                    }
+                });
+    }
+    
+    private void sendEmailVerification() {
+        FirebaseUser user = firebaseAuth.getCurrentUser();
+
+        user.sendEmailVerification()
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull @NotNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG,"Verification sent.");
+                        }
                     }
                 });
     }

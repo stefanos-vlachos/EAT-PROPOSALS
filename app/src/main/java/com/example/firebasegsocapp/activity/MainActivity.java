@@ -1,8 +1,9 @@
-package com.example.firebasegsocapp;
+package com.example.firebasegsocapp.activity;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
@@ -16,8 +17,22 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import com.example.firebasegsocapp.FirebaseFile;
+import com.example.firebasegsocapp.R;
+import com.example.firebasegsocapp.adapter.SliderAdapter;
+import com.example.firebasegsocapp.SliderData;
+import com.example.firebasegsocapp.domain.User;
+import com.google.android.gms.auth.api.identity.*;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.*;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.*;
 import com.smarteist.autoimageslider.SliderView;
 import org.jetbrains.annotations.NotNull;
@@ -27,17 +42,22 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static FirebaseAuth FIREBASE_AUTH = FirebaseAuth.getInstance();
+
     private final int REGISTER_ACTIVITY_CODE = 1;
     private final int UPLOAD_FILES_ACTIVITY_CODE = 2;
-    public static FirebaseAuth FIREBASE_AUTH = FirebaseAuth.getInstance();
+    private final int ONE_TAP_REGISTRATION_CODE = 3;
 
     Button btnUploadFile;
     Button btnViewFiles;
     TextView txtViewLearnMore;
     TextView txtViewLogin;
+
     Uri pdfUri;
     StorageReference storageReference;
     ArrayList<FirebaseFile> fileReferences;
+    SignInClient oneTapClient;
+    BeginSignInRequest signInRequest;
 
     public static FirebaseAuth getFirebaseAuth() {
         return FIREBASE_AUTH;
@@ -61,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         txtViewLogin = findViewById(R.id.txtViewLogin);
         btnUploadFile = findViewById(R.id.btnUploadFile);
         btnViewFiles = findViewById(R.id.btnViewFiles);
+
         txtViewLearnMore = findViewById(R.id.txtViewLearnMore);
         SpannableString content = new SpannableString("Learn More");
         content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
@@ -77,17 +98,22 @@ public class MainActivity extends AppCompatActivity {
                     updateRegisterDependentElements();
                 }
             });
-        } else {
-            txtViewLogin.setText("Sign Up | Sign In");
-            txtViewLogin.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                    intent.putExtra("type", "login");
-                    startActivityForResult(intent, REGISTER_ACTIVITY_CODE);
-                }
-            });
+            return;
         }
+
+        txtViewLogin.setText("Sign Up | Sign In");
+        txtViewLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Use custom form for registering
+                /*Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                intent.putExtra("type", "login");
+                startActivityForResult(intent, REGISTER_ACTIVITY_CODE);*/
+
+                //Use Google One-Tap
+                initOneTapRegistration();
+            }
+        });
     }
 
     private void setListeners() {
@@ -100,12 +126,16 @@ public class MainActivity extends AppCompatActivity {
                     intent.setType("application/pdf");
                     intent.setAction(Intent.ACTION_GET_CONTENT);
                     startActivityForResult(Intent.createChooser(intent, "Select Document"), UPLOAD_FILES_ACTIVITY_CODE);
+                    return;
                 }
-                else{
-                    intent = new Intent(getApplicationContext(), LoginActivity.class);
-                    intent.putExtra("type", "login");
-                    startActivityForResult(intent, REGISTER_ACTIVITY_CODE);
-                }
+
+                //Use custom form for registering
+                /*intent = new Intent(getApplicationContext(), LoginActivity.class);
+                intent.putExtra("type", "login");
+                startActivityForResult(intent, REGISTER_ACTIVITY_CODE);*/
+
+                //Use Google One-Tap
+                initOneTapRegistration();
             }
         });
 
@@ -146,6 +176,38 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void initOneTapRegistration(){
+        oneTapClient = Identity.getSignInClient(this);
+        signInRequest = BeginSignInRequest.builder()
+                .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                        .setSupported(true)
+                        .setServerClientId(getString(R.string.default_web_client_id))
+                        .setFilterByAuthorizedAccounts(false)
+                        .build())
+                .setAutoSelectEnabled(true)
+                .build();
+
+        oneTapClient.beginSignIn(signInRequest)
+                .addOnSuccessListener(this, new OnSuccessListener<BeginSignInResult>() {
+                    @Override
+                    public void onSuccess(BeginSignInResult beginSignInResult) {
+                        try {
+                            startIntentSenderForResult(
+                                    beginSignInResult.getPendingIntent().getIntentSender(), ONE_TAP_REGISTRATION_CODE,
+                                    null, 0, 0, 0);
+                        } catch (IntentSender.SendIntentException e) {
+                            Toast.makeText(MainActivity.this, "Couldn't start One Tap UI: " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                })
+                .addOnFailureListener(this, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull @NotNull Exception e) {
+                        Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
     private void configureSlideshow(){
         ArrayList<SliderData> sliderDataArrayList = new ArrayList<>();
 
@@ -153,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
 
         sliderDataArrayList.add(new SliderData("\"EAT is an additional JBOSS testsuite.\"",
                 getResources().getIdentifier(getPackageName()+":drawable/image1", null, null)));
-        sliderDataArrayList.add(new SliderData("\"Write your tests once and run them against any version of EAP and WILDFLY application server.\"",
+        sliderDataArrayList.add(new SliderData("\"This app contains Proposals and Documentation of EAT multi-version programs.\"",
                 getResources().getIdentifier(getPackageName()+":drawable/image2", null, null)));
         sliderDataArrayList.add(new SliderData("\"Use this app to view files related to EAT.\"",
                 getResources().getIdentifier(getPackageName()+":drawable/image3", null, null)));
@@ -213,12 +275,64 @@ public class MainActivity extends AppCompatActivity {
                             });
                 }
                 break;
-
             case REGISTER_ACTIVITY_CODE:
                 if(resultCode == RESULT_OK)
                     updateRegisterDependentElements();
                 break;
+            case ONE_TAP_REGISTRATION_CODE:
+                try {
+                    SignInCredential credential = oneTapClient.getSignInCredentialFromIntent(data);
+                    String idToken = credential.getGoogleIdToken();
+                    String fullName = credential.getDisplayName();
+                    String email = credential.getId();
+                    AuthCredential firebaseCredential = GoogleAuthProvider.getCredential(idToken, null);
+                        getFirebaseAuth().signInWithCredential(firebaseCredential)
+                            .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    if (task.isSuccessful()) {
+                                        // Sign in success, update UI with the signed-in user's information
+                                        Toast.makeText(MainActivity.this, "signInWithCredential:success", Toast.LENGTH_SHORT).show();
+                                        generateUserInDatabase(idToken, email, fullName);
+                                        updateRegisterDependentElements();
+                                    } else {
+                                        // If sign in fails, display a message to the user.
+                                        Toast.makeText(MainActivity.this, "signInWithCredential:failure", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                } catch (ApiException e) {
+                    Toast.makeText(this, "ERROR: " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                }
+                break;
         }
+    }
+
+    private void generateUserInDatabase(String userIdToken, String userEmail, String userFullName){
+        
+        //Store in Firebase Real Time Database
+        /*FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference users = database.getReference("users");
+        User user = new User(userIdToken, userEmail, userFullName);
+        users.push().setValue(user);*/
+
+        //Store in Firbase Cloud Firestore
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("users").document(userEmail)
+                .set(new User(userIdToken, userEmail, userFullName))
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        Toast.makeText(MainActivity.this, "Stored user", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull @NotNull Exception e) {
+                        Toast.makeText(MainActivity.this, "User Storage Failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
     }
 
     //method to compose the name of the uploaded files

@@ -1,10 +1,13 @@
-package com.example.firebasegsocapp;
+package com.example.firebasegsocapp.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.example.firebasegsocapp.adapter.FilesAdapter;
+import com.example.firebasegsocapp.FirebaseFile;
+import com.example.firebasegsocapp.R;
 
 import java.util.ArrayList;
 
