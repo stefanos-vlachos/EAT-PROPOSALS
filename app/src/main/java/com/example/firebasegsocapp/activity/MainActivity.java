@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
                         .setServerClientId(getString(R.string.default_web_client_id))
                         .setFilterByAuthorizedAccounts(false)
                         .build())
-                .setAutoSelectEnabled(true)
+                .setAutoSelectEnabled(false)
                 .build();
 
         oneTapClient.beginSignIn(signInRequest)
