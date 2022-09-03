@@ -182,9 +182,9 @@ public class MainActivity extends AppCompatActivity {
                 .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                         .setSupported(true)
                         .setServerClientId(getString(R.string.default_web_client_id))
-                        .setFilterByAuthorizedAccounts(false)
+                        .setFilterByAuthorizedAccounts(true)
                         .build())
-                .setAutoSelectEnabled(false)
+                .setAutoSelectEnabled(true)
                 .build();
 
         oneTapClient.beginSignIn(signInRequest)

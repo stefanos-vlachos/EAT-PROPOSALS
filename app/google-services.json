@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "489697442067",
+    "firebase_url": "https://gsoc-app-default-rtdb.firebaseio.com",
     "project_id": "gsoc-app",
     "storage_bucket": "gsoc-app.appspot.com"
   },
