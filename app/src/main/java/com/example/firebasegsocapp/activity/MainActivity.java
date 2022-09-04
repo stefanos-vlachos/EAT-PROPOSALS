@@ -56,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Uri pdfUri;
     private StorageReference storageReference;
-    private ArrayList<FirebaseFile> fileReferences;
     private SignInClient oneTapClient;
     private BeginSignInRequest signInRequest;
 
@@ -108,7 +107,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         storageReference = FirebaseStorage.getInstance().getReference();
-        fileReferences =  new ArrayList<>();
 
         txtViewLogin = findViewById(R.id.txtViewLogin);
         btnUploadFile = findViewById(R.id.btnUploadFile);
@@ -148,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
                 storageReference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
                             @Override
                             public void onSuccess(ListResult listResult) {
+                                ArrayList<FirebaseFile> fileReferences =  new ArrayList<>();;
                                 for(StorageReference fileReference : listResult.getItems()) {
                                     String filePath = fileReference.getPath();
                                     int cut = filePath.lastIndexOf(".");

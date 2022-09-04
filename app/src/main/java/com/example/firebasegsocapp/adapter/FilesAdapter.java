@@ -52,10 +52,13 @@ public class FilesAdapter extends
         FirebaseFile firebaseFile = firebaseFiles.get(position);
 
         TextView textView = holder.nameTextView;
+        ImageView imageView = holder.imageView;
+        TextView downloadView = holder.downloadView;
+
         textView.setText(firebaseFile.getFileName() + "." + firebaseFile.getFileType());
         textView.setSelected(true);
-        ImageView imageView = holder.imageView;
-        imageView.setOnClickListener(new View.OnClickListener() {
+
+        downloadView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
@@ -84,6 +87,7 @@ public class FilesAdapter extends
                 alert.show();
             }
         });
+
     }
 
     private void downloadFile(Context context, String fileName, String fileExtension, String destinationDirectory, String url) {
@@ -108,6 +112,7 @@ public class FilesAdapter extends
         // for any view that will be set as you render a row
         public TextView nameTextView;
         public ImageView imageView;
+        public TextView downloadView;
 
         // We also create a constructor that accepts the entire item row
         // and does the view lookups to find each subview
@@ -118,6 +123,7 @@ public class FilesAdapter extends
 
             nameTextView = itemView.findViewById(R.id.txtName);
             imageView = itemView.findViewById(R.id.imageView);
+            downloadView = itemView.findViewById(R.id.txtViewDownloadFile);
         }
     }
 

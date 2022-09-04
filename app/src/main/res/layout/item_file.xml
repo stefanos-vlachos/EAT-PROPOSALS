@@ -3,48 +3,64 @@
                                    android:layout_width="match_parent"
                                    android:layout_height="wrap_content"
                                    xmlns:app="http://schemas.android.com/apk/res-auto"
+                                   android:id="@+id/cardView"
                                    android:orientation="horizontal"
-                                   android:layout_marginTop="8dp"
-                                   android:layout_marginEnd="8dp"
                                    app:cardElevation="3dp"
                                    app:cardCornerRadius="8dp"
-                                   android:layout_marginStart="8dp"
-                                   android:id="@+id/cardView"
-                                   android:layout_marginBottom="8dp"
+                                   android:layout_marginBottom="4dp"
+                                   android:layout_marginTop="4dp"
+                                   android:layout_marginEnd="4dp"
+                                   android:layout_marginStart="4dp"
 >
 
     <LinearLayout android:layout_width="match_parent"
-                  android:layout_height="200dp"
-                  android:orientation="vertical"
+                  android:layout_height="50dp"
+                  android:orientation="horizontal"
                   android:padding="8dp">
 
-        <ImageView android:layout_width="match_parent"
-                   android:layout_height="150dp"
+        <ImageView android:layout_width="50dp"
+                   android:layout_height="match_parent"
                    android:layout_marginStart="5dp"
-                   android:layout_marginTop="5dp"
                    android:src="@drawable/pdf_icon"
                    android:id="@+id/imageView"
                    android:layout_marginLeft="5dp"
         />
 
-        <TextView android:layout_width="match_parent"
-                  android:layout_height="30dp"
-                  android:id="@+id/txtName"
-                  android:text="File Name"
-                  android:textSize="15sp"
-                  android:singleLine="true"
-                  android:ellipsize="marquee"
-                  android:marqueeRepeatLimit="marquee_forever"
-                  android:scrollHorizontally="true"
-                  android:layout_marginStart="5dp"
-                  android:layout_marginEnd="5dp"
-                  android:padding="6dp"
-                  android:height="50dp"
-                  android:textColor="@color/black"
-                  android:focusable="true"
-                  android:focusableInTouchMode="true"
-                  android:freezesText="true"
-        />
+        <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+        >
+            <TextView android:layout_width="match_parent"
+                      android:layout_height="30dp"
+                      android:id="@+id/txtName"
+                      android:text="File Name"
+                      android:textSize="15sp"
+                      android:singleLine="true"
+                      android:ellipsize="marquee"
+                      android:marqueeRepeatLimit="marquee_forever"
+                      android:scrollHorizontally="true"
+                      android:layout_marginStart="5dp"
+                      android:layout_marginEnd="5dp"
+                      android:padding="6dp"
+                      android:height="50dp"
+                      android:textColor="@color/black"
+                      android:focusable="true"
+                      android:focusableInTouchMode="true"
+                      android:freezesText="true"
+                      android:layout_alignParentStart="true"
+            />
+            <TextView
+                    android:id="@+id/txtViewDownloadFile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/blue_pantone"
+                    android:text="Download"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:textSize="12sp"
+            />
+        </RelativeLayout>
+
 
     </LinearLayout>
 

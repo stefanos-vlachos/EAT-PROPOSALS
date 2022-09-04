@@ -25,7 +25,7 @@ public class ViewFilesActivity extends AppCompatActivity {
         firebaseFiles = (ArrayList<FirebaseFile>) intent.getSerializableExtra("fileReferences");
 
         RecyclerView rvFiles = findViewById(R.id.rvFiles);
-        rvFiles.setLayoutManager(new GridLayoutManager(this, 3));
+        rvFiles.setLayoutManager(new GridLayoutManager(this, 1));
         FilesAdapter adapter = new FilesAdapter(firebaseFiles);
         rvFiles.setAdapter(adapter);
     }
