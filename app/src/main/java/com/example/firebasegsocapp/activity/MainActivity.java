@@ -96,11 +96,11 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         //Use custom form for registering
-                        //Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                        //startActivity(intent);
+                        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                        startActivity(intent);
 
                         //Use Google One-Tap
-                        initOneTapRegistration();
+                        //initOneTapRegistration();
                     }
                 });
 
@@ -134,11 +134,11 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 //Use custom form for registering
-                //intent = new Intent(getApplicationContext(), LoginActivity.class);
-                //startActivity(intent);
+                intent = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(intent);
 
                 //Use Google One-Tap
-                initOneTapRegistration();
+                //initOneTapRegistration();
             }
         });
 
