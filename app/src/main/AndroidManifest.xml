@@ -17,13 +17,13 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.FirebaseGsocApp">
         <activity
-                android:name=".activity.LearnMoreActivity"
-                android:parentActivityName=".activity.MainActivity"
-                android:exported="true">
-            <meta-data
-                    android:name="android:support:PARENT_ACTIVITY"
-                    android:value=".MainActivity" />
-        </activity>
+            android:name=".activity.LearnMoreActivity"
+            android:parentActivityName=".activity.MainActivity"
+            android:exported="true">
+        <meta-data
+                android:name="android:support:PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+    </activity>
         <activity
                 android:name=".activity.ViewFilesActivity"
                 android:parentActivityName=".activity.MainActivity"
@@ -34,6 +34,14 @@
         </activity>
         <activity
                 android:name=".activity.LoginActivity"
+                android:parentActivityName=".activity.MainActivity"
+                android:exported="true">
+            <meta-data
+                    android:name="android:support:PARENT_ACTIVITY"
+                    android:value=".MainActivity" />
+        </activity>
+        <activity
+                android:name=".activity.CreateAccountActivity"
                 android:parentActivityName=".activity.MainActivity"
                 android:exported="true">
             <meta-data
