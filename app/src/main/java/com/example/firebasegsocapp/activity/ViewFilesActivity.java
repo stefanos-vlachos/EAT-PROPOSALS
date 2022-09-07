@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -19,9 +20,8 @@ import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.example.firebasegsocapp.activity.MainActivity.getStorageReference;
 
@@ -32,8 +32,9 @@ public class ViewFilesActivity extends AppCompatActivity {
     private static ProgressDialog progressDialog;
 
     private StorageReference storageReference;
-    private ArrayList<FirebaseFile> firebaseFiles;
+    private List<FirebaseFile> firebaseFiles;
     private RecyclerView rvFiles;
+    private FilesAdapter adapter;
     private TextView txtViewSortFiles;
 
     private final String[] sortItems = new String[]{"File Name", "File Size", "Upload Date", "File Type"};
@@ -67,9 +68,7 @@ public class ViewFilesActivity extends AppCompatActivity {
                 builder.setIcon(R.mipmap.ic_launcher);
                 builder.setSingleChoiceItems(sortItems, checkedItem[0], (dialog, which) -> {
                     checkedItem[0] = which;
-                });
-                builder.setPositiveButton("Sort", (dialog, which) ->{
-                    sortFiles(checkedItem[0]);
+                    sortFiles(which);
                     checkedItem[0]=-1;
                     dialog.dismiss();
                 });
@@ -129,23 +128,56 @@ public class ViewFilesActivity extends AppCompatActivity {
 
     private void configureRecyclerView(){
         rvFiles.setLayoutManager(new GridLayoutManager(this, 1));
-        FilesAdapter adapter = new FilesAdapter(firebaseFiles);
+        adapter = new FilesAdapter(firebaseFiles);
         rvFiles.setAdapter(adapter);
         progressDialog.dismiss();
     }
 
     private void sortFiles(int sortSelection){
+
         switch (sortSelection){
+            case 0:
+                Toast.makeText(this, "Sorting Name", Toast.LENGTH_SHORT).show();
+                Collections.sort(firebaseFiles, new Comparator<FirebaseFile>() {
+                    @Override
+                    public int compare(FirebaseFile file1, FirebaseFile file2) {
+                        return file1.getFileName().compareTo(file2.getFileName());
+                    }
+                });
+                adapter.notifyDataSetChanged();
+                break;
             case 1:
+                Toast.makeText(this, "Sorting Size", Toast.LENGTH_SHORT).show();
+                Collections.sort(firebaseFiles, new Comparator<FirebaseFile>() {
+                    @Override
+                    public int compare(FirebaseFile file1, FirebaseFile file2) {
+                        return Integer.compare(Integer.parseInt(file1.getFileSize()), Integer.parseInt(file2.getFileSize()));
+                    }
+                });
+                adapter.notifyDataSetChanged();
                 break;
             case 2:
+                Collections.sort(firebaseFiles, new Comparator<FirebaseFile>(){
+                    @Override
+                    public int compare(FirebaseFile file1, FirebaseFile file2){
+                        return file1.getCreationTime().compareTo(file2.getCreationTime());
+                    }
+                });
+                adapter.notifyDataSetChanged();
                 break;
             case 3:
-                break;
-            case 4:
+                Toast.makeText(this, "Sorting Type", Toast.LENGTH_SHORT).show();
+                Collections.sort(firebaseFiles, new Comparator<FirebaseFile>() {
+                    @Override
+                    public int compare(FirebaseFile file1, FirebaseFile file2) {
+                        return file1.getFileType().compareTo(file2.getFileType());
+                    }
+                });
+                adapter.notifyDataSetChanged();
                 break;
         }
     }
+
     @Override
     public void onBackPressed(){
         super.onBackPressed();
