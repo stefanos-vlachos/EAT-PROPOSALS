@@ -1,7 +1,10 @@
 package com.example.firebasegsocapp.activity;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -24,12 +27,17 @@ import static com.example.firebasegsocapp.activity.MainActivity.getStorageRefere
 
 public class ViewFilesActivity extends AppCompatActivity {
 
-    private StorageReference storageReference;
-    private ArrayList<FirebaseFile> firebaseFiles;
-    private RecyclerView rvFiles;
     private static int filesToParse;
     private static int parsedFiles = 0;
     private static ProgressDialog progressDialog;
+
+    private StorageReference storageReference;
+    private ArrayList<FirebaseFile> firebaseFiles;
+    private RecyclerView rvFiles;
+    private TextView txtViewSortFiles;
+
+    private final String[] sortItems = new String[]{"File Name", "File Size", "Upload Date", "File Type"};
+    private final int[] checkedItem = {-1};
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -37,6 +45,7 @@ public class ViewFilesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_view_files);
 
         init();
+        setListeners();
         getFilesFromFirebase();
     }
 
@@ -46,6 +55,31 @@ public class ViewFilesActivity extends AppCompatActivity {
         storageReference = getStorageReference();
         firebaseFiles= new ArrayList<>();
         rvFiles = findViewById(R.id.rvFiles);
+        txtViewSortFiles = findViewById(R.id.txtViewSortFiles);
+    }
+
+    private void setListeners(){
+        txtViewSortFiles.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(ViewFilesActivity.this);
+                builder.setTitle("Sort files by:");
+                builder.setIcon(R.mipmap.ic_launcher);
+                builder.setSingleChoiceItems(sortItems, checkedItem[0], (dialog, which) -> {
+                    checkedItem[0] = which;
+                });
+                builder.setPositiveButton("Sort", (dialog, which) ->{
+                    sortFiles(checkedItem[0]);
+                    checkedItem[0]=-1;
+                    dialog.dismiss();
+                });
+                builder.setNegativeButton("Cancel", (dialog,which)->{
+                    checkedItem[0]=-1;
+                });
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+            }
+        });
     }
 
     private void getFilesFromFirebase(){
@@ -100,6 +134,18 @@ public class ViewFilesActivity extends AppCompatActivity {
         progressDialog.dismiss();
     }
 
+    private void sortFiles(int sortSelection){
+        switch (sortSelection){
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+        }
+    }
     @Override
     public void onBackPressed(){
         super.onBackPressed();

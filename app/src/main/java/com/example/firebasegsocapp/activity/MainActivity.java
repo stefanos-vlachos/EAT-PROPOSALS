@@ -40,8 +40,8 @@ public class MainActivity extends AppCompatActivity {
     public static FirebaseFirestore FIREBASE_FIRESTORE = FirebaseFirestore.getInstance();
     public static StorageReference STORAGE_REFERENCE = FirebaseStorage.getInstance().getReference();
 
-    private final int UPLOAD_FILES_ACTIVITY_CODE = 3;
-    private final int ONE_TAP_REGISTRATION_CODE = 4;
+    private final int UPLOAD_FILES_ACTIVITY_CODE = 1;
+    private final int ONE_TAP_REGISTRATION_CODE = 2;
     private final String[] MIME_TYPES = {
             "application/pdf", "application/xml", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             "application/vnd.ms-excel", "application/xhtml+xml", "text/plain", "application/rtf",
@@ -252,7 +252,7 @@ public class MainActivity extends AppCompatActivity {
                             });
                 }
                 break;
-            case ONE_TAP_REGISTRATION_CODE:
+            /*case ONE_TAP_REGISTRATION_CODE:
                 try {
                     SignInCredential credential = oneTapClient.getSignInCredentialFromIntent(data);
                     String idToken = credential.getGoogleIdToken();
@@ -277,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
                 } catch (ApiException e) {
                     Toast.makeText(this, "ERROR: " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                 }
-                break;
+                break;*/
         }
     }
 
@@ -317,32 +317,6 @@ public class MainActivity extends AppCompatActivity {
         MimeTypeMap mime = MimeTypeMap.getSingleton();
         String fileExtension = mime.getExtensionFromMimeType(cR.getType(fileUri));
         return fileExtension;
-    }
-
-    private void generateUserInDatabase(String userIdToken, String userEmail, String userFullName){
-
-        //Store in Firebase Real Time Database
-        /*FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference users = database.getReference("users");
-        User user = new User(userIdToken, userEmail, userFullName);
-        users.push().setValue(user);*/
-
-        //Store in Firbase Cloud Firestore
-        FIREBASE_FIRESTORE.collection("users").document(userEmail)
-                .set(new User(userIdToken, userEmail, userFullName))
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        Toast.makeText(MainActivity.this, "Stored user", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull @NotNull Exception e) {
-                        Toast.makeText(MainActivity.this, "User Storage Failed", Toast.LENGTH_SHORT).show();
-                    }
-                });
-
     }
 
 }
