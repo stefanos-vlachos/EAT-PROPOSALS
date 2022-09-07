@@ -13,11 +13,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.firebasegsocapp.FirebaseFile;
+import com.example.firebasegsocapp.domain.FirebaseFile;
 import com.example.firebasegsocapp.R;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.HashMap;
 import java.util.List;
 
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
@@ -26,6 +28,24 @@ public class FilesAdapter extends
         RecyclerView.Adapter<FilesAdapter.ViewHolder>{
 
     private List<FirebaseFile> firebaseFiles;
+    private static HashMap<String, Integer> fileExtensionImages;
+    static {
+        fileExtensionImages = new HashMap<>();
+        fileExtensionImages.put("doc", R.drawable.word_icon);
+        fileExtensionImages.put("docx", R.drawable.word_icon);
+        fileExtensionImages.put("pdf", R.drawable.pdf_icon);
+        fileExtensionImages.put("xml", R.drawable.xml_icon);
+        fileExtensionImages.put("xlsx", R.drawable.xml_icon);
+        fileExtensionImages.put("xls", R.drawable.xml_icon);
+        fileExtensionImages.put("txt", R.drawable.txt_icon);
+        fileExtensionImages.put("rtf", R.drawable.document_icon);
+        fileExtensionImages.put("ppt", R.drawable.ppt_icon);
+        fileExtensionImages.put("pptx", R.drawable.ppt_icon);
+        fileExtensionImages.put("odt", R.drawable.document_icon);
+        fileExtensionImages.put("json", R.drawable.json_icon);
+        fileExtensionImages.put("csv", R.drawable.csv_icon);
+        fileExtensionImages.put("html", R.drawable.html_icon);
+    }
 
     public FilesAdapter(List<FirebaseFile> files) {
         firebaseFiles = files;
@@ -54,9 +74,19 @@ public class FilesAdapter extends
         TextView textView = holder.nameTextView;
         ImageView imageView = holder.imageView;
         TextView downloadView = holder.downloadView;
+        TextView fileSizeView = holder.fileSizeView;
+        TextView createdOnView = holder.createdOnView;
+
+        setImageForFileExtension(imageView, firebaseFile.getFileType());
 
         textView.setText(firebaseFile.getFileName() + "." + firebaseFile.getFileType());
         textView.setSelected(true);
+
+        fileSizeView.setText(firebaseFile.getFileSize() + "kB");
+        fileSizeView.setSelected(true);
+
+        createdOnView.setText(firebaseFile.getCreationTime());
+        createdOnView.setSelected(true);
 
         downloadView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,6 +120,10 @@ public class FilesAdapter extends
 
     }
 
+    private void setImageForFileExtension(ImageView imageView, String fileType) {
+        imageView.setImageResource(fileExtensionImages.get(fileType));
+    }
+
     private void downloadFile(Context context, String fileName, String fileExtension, String destinationDirectory, String url) {
         DownloadManager downloadmanager = (DownloadManager) context.
                 getSystemService(Context.DOWNLOAD_SERVICE);
@@ -113,6 +147,8 @@ public class FilesAdapter extends
         public TextView nameTextView;
         public ImageView imageView;
         public TextView downloadView;
+        public TextView fileSizeView;
+        public TextView createdOnView;
 
         // We also create a constructor that accepts the entire item row
         // and does the view lookups to find each subview
@@ -124,6 +160,8 @@ public class FilesAdapter extends
             nameTextView = itemView.findViewById(R.id.txtName);
             imageView = itemView.findViewById(R.id.imageView);
             downloadView = itemView.findViewById(R.id.txtViewDownloadFile);
+            fileSizeView = itemView.findViewById(R.id.txtViewFileSizeValue);
+            createdOnView = itemView.findViewById(R.id.txtViewCreationTimeValue);
         }
     }
 

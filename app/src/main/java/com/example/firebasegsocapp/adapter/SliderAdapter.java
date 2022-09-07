@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.example.firebasegsocapp.R;
-import com.example.firebasegsocapp.SliderData;
+import com.example.firebasegsocapp.domain.SliderData;
 import com.smarteist.autoimageslider.SliderViewAdapter;
 
 import java.util.ArrayList;

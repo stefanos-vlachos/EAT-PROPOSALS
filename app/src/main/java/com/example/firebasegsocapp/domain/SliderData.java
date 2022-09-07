@@ -1,4 +1,4 @@
-package com.example.firebasegsocapp;
+package com.example.firebasegsocapp.domain;
 
 public class SliderData {
 

@@ -1,10 +1,8 @@
 package com.example.firebasegsocapp.activity;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.database.Cursor;
@@ -13,6 +11,7 @@ import android.provider.OpenableColumns;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,23 +19,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import com.example.firebasegsocapp.FirebaseFile;
 import com.example.firebasegsocapp.R;
 import com.example.firebasegsocapp.adapter.SliderAdapter;
-import com.example.firebasegsocapp.SliderData;
+import com.example.firebasegsocapp.domain.SliderData;
 import com.example.firebasegsocapp.domain.User;
 import com.google.android.gms.auth.api.identity.*;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.*;
 import com.google.firebase.auth.*;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.*;
 import com.smarteist.autoimageslider.SliderView;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 
 
@@ -44,23 +38,33 @@ public class MainActivity extends AppCompatActivity {
 
     public static FirebaseAuth FIREBASE_AUTH = FirebaseAuth.getInstance();
     public static FirebaseFirestore FIREBASE_FIRESTORE = FirebaseFirestore.getInstance();
-    public static boolean IS_FIRST_LOGIN = true;
+    public static StorageReference STORAGE_REFERENCE = FirebaseStorage.getInstance().getReference();
 
     private final int UPLOAD_FILES_ACTIVITY_CODE = 3;
     private final int ONE_TAP_REGISTRATION_CODE = 4;
+    private final String[] MIME_TYPES = {
+            "application/pdf", "application/xml", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.ms-excel", "application/xhtml+xml", "text/plain", "application/rtf",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            "application/vnd.ms-powerpoint", "application/vnd.oasis.opendocument.text", "application/json",
+            "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "text/csv", "text/html"
+    };
 
     private Button btnUploadFile;
     private Button btnViewFiles;
     private TextView txtViewLearnMore;
     private TextView txtViewLogin;
-
     private Uri pdfUri;
-    private StorageReference storageReference;
     private SignInClient oneTapClient;
     private BeginSignInRequest signInRequest;
 
     public static FirebaseAuth getFirebaseAuth() {
         return FIREBASE_AUTH;
+    }
+
+    public static StorageReference getStorageReference() {
+        return STORAGE_REFERENCE;
     }
 
     @Override
@@ -74,6 +78,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init() {
+        txtViewLogin = findViewById(R.id.txtViewLogin);
+        btnUploadFile = findViewById(R.id.btnUploadFile);
+        btnViewFiles = findViewById(R.id.btnViewFiles);
+
+        txtViewLearnMore = findViewById(R.id.txtViewLearnMore);
+        SpannableString content = new SpannableString("Learn More");
+        content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
+        txtViewLearnMore.setText(content);
+    }
+
+    private void setListeners() {
         getFirebaseAuth().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull @NotNull FirebaseAuth firebaseAuth) {
@@ -106,26 +121,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        storageReference = FirebaseStorage.getInstance().getReference();
-
-        txtViewLogin = findViewById(R.id.txtViewLogin);
-        btnUploadFile = findViewById(R.id.btnUploadFile);
-        btnViewFiles = findViewById(R.id.btnViewFiles);
-
-        txtViewLearnMore = findViewById(R.id.txtViewLearnMore);
-        SpannableString content = new SpannableString("Learn More");
-        content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
-        txtViewLearnMore.setText(content);
-    }
-
-    private void setListeners() {
         btnUploadFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent;
                 if(getFirebaseAuth().getCurrentUser()!=null && getFirebaseAuth().getCurrentUser().isEmailVerified()){
                     intent = new Intent();
-                    intent.setType("application/pdf");
+                    intent.setType("*/*");
+                    intent.putExtra(Intent.EXTRA_MIME_TYPES, MIME_TYPES);
+                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                     intent.setAction(Intent.ACTION_GET_CONTENT);
                     startActivityForResult(Intent.createChooser(intent, "Select Document"), UPLOAD_FILES_ACTIVITY_CODE);
                     return;
@@ -143,29 +147,8 @@ public class MainActivity extends AppCompatActivity {
         btnViewFiles.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                storageReference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
-                            @Override
-                            public void onSuccess(ListResult listResult) {
-                                ArrayList<FirebaseFile> fileReferences =  new ArrayList<>();;
-                                for(StorageReference fileReference : listResult.getItems()) {
-                                    String filePath = fileReference.getPath();
-                                    int cut = filePath.lastIndexOf(".");
-                                    String fileName = filePath.substring(1,cut);
-                                    String fileType = filePath.substring(cut+1);
-                                    fileReferences.add(new FirebaseFile(filePath, fileName, fileType));
-                                }
-
-                                Intent intent = new Intent(getApplicationContext(), ViewFilesActivity.class);
-                                intent.putExtra("fileReferences", fileReferences);
-                                startActivity(intent);
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull @NotNull Exception e) {
-                                Toast.makeText(MainActivity.this, "Process failed.", Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                Intent intent = new Intent(getApplicationContext(), ViewFilesActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -243,29 +226,21 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode){
             case UPLOAD_FILES_ACTIVITY_CODE:
                 if(resultCode == RESULT_OK && data.getData()!=null) {
-                    pdfUri = data.getData();
-                    String fileName = getFileName(pdfUri);
-                    Toast.makeText(this, fileName, Toast.LENGTH_SHORT).show();
-
                     final ProgressDialog progressDialog = new ProgressDialog(this);
                     progressDialog.setMessage("Uploading");
                     progressDialog.show();
 
-                    StorageReference reference = storageReference.child(fileName + ".pdf");
+                    pdfUri = data.getData();
+                    String fileName = getFileName(pdfUri);
+                    String fileExtension = getFileExtension(pdfUri);
+
+                    StorageReference reference = getStorageReference().child(fileName + "." + fileExtension);
                     reference.putFile(pdfUri)
                             .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                 @Override
                                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                                     progressDialog.dismiss();
                                     Toast.makeText(MainActivity.this, "Uploaded Succesfully", Toast.LENGTH_SHORT).show();
-                                }
-                            })
-                            .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                                @Override
-                                public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
-                                    double progress = (100.0 * taskSnapshot.getBytesTransferred() )/ taskSnapshot
-                                            .getTotalByteCount();
-                                    progressDialog.setMessage("Uploaded " + (int) progress + "%");
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
@@ -335,6 +310,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return fileName;
+    }
+
+    private String getFileExtension(Uri fileUri){
+        ContentResolver cR = this.getContentResolver();
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        String fileExtension = mime.getExtensionFromMimeType(cR.getType(fileUri));
+        return fileExtension;
     }
 
     private void generateUserInDatabase(String userIdToken, String userEmail, String userFullName){

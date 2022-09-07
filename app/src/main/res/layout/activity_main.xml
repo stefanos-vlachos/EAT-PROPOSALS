@@ -50,7 +50,9 @@
         <TextView
                 android:text="Welcome to EAT-PROPOSALS."
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/textView4" android:textColor="@color/black"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView4"
+                android:textColor="@color/black"
                 android:textSize="24sp"
                 android:layout_above="@id/slider"
                 android:layout_centerHorizontal="true"
