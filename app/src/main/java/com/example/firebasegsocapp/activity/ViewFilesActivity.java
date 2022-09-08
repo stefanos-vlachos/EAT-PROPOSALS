@@ -19,12 +19,10 @@ import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import org.jetbrains.annotations.NotNull;
-import org.joda.time.DateTime;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.Instant;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.example.firebasegsocapp.activity.MainActivity.getStorageReference;
 
@@ -33,12 +31,14 @@ public class ViewFilesActivity extends AppCompatActivity {
     private static int filesToParse;
     private static int parsedFiles = 0;
     private static ProgressDialog progressDialog;
+    private static String viewType = "list";
 
     private StorageReference storageReference;
     private List<FirebaseFile> firebaseFiles;
     private RecyclerView rvFiles;
     private FilesAdapter adapter;
     private TextView txtViewSortFiles;
+    private TextView txtViewChangeViewFiles;
 
     private final String[] sortItems = new String[]{"File Name", "File Size", "Upload Date", "File Type"};
     private final int[] checkedItem = {-1};
@@ -60,6 +60,7 @@ public class ViewFilesActivity extends AppCompatActivity {
         firebaseFiles= new ArrayList<>();
         rvFiles = findViewById(R.id.rvFiles);
         txtViewSortFiles = findViewById(R.id.txtViewSortFiles);
+        txtViewChangeViewFiles = findViewById(R.id.txtViewChangeFilesView);
     }
 
     private void setListeners(){
@@ -80,6 +81,21 @@ public class ViewFilesActivity extends AppCompatActivity {
                 });
                 AlertDialog alertDialog = builder.create();
                 alertDialog.show();
+            }
+        });
+
+        txtViewChangeViewFiles.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(viewType.equals("list")){
+                    txtViewChangeViewFiles.setText("List View");
+                    viewType = "grid";
+                    configureRecyclerView();
+                    return;
+                }
+                txtViewChangeViewFiles.setText("Grid View");
+                viewType = "list";
+                configureRecyclerView();
             }
         });
     }
@@ -128,8 +144,11 @@ public class ViewFilesActivity extends AppCompatActivity {
     }
 
     private void configureRecyclerView(){
-        rvFiles.setLayoutManager(new GridLayoutManager(this, 1));
-        adapter = new FilesAdapter(firebaseFiles);
+        if(viewType.equals("list"))
+            rvFiles.setLayoutManager(new GridLayoutManager(this, 1));
+        else
+            rvFiles.setLayoutManager(new GridLayoutManager(this, 2));
+        adapter = new FilesAdapter(firebaseFiles, viewType);
         rvFiles.setAdapter(adapter);
         progressDialog.dismiss();
     }

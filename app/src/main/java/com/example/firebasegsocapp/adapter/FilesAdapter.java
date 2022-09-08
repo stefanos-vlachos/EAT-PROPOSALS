@@ -29,6 +29,7 @@ public class FilesAdapter extends
 
     private List<FirebaseFile> firebaseFiles;
     private static HashMap<String, Integer> fileExtensionImages;
+    private String filesViewType;
     static {
         fileExtensionImages = new HashMap<>();
         fileExtensionImages.put(".doc", R.drawable.word_icon);
@@ -51,8 +52,9 @@ public class FilesAdapter extends
         fileExtensionImages.put(".tex", R.drawable.document_icon);
     }
 
-    public FilesAdapter(List<FirebaseFile> files) {
+    public FilesAdapter(List<FirebaseFile> files, String viewType) {
         firebaseFiles = files;
+        filesViewType = viewType;
     }
 
     @NonNull
@@ -63,7 +65,11 @@ public class FilesAdapter extends
         LayoutInflater inflater = LayoutInflater.from(context);
 
         // Inflate the custom layout
-        View fileView = inflater.inflate(R.layout.item_file, parent, false);
+        View fileView;
+        if(filesViewType.equals("grid"))
+            fileView = inflater.inflate(R.layout.grid_item_file, parent, false);
+        else
+            fileView = inflater.inflate(R.layout.item_file, parent, false);
 
         // Return a new holder instance
         ViewHolder viewHolder = new ViewHolder(fileView);

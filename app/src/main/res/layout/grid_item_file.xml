@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+                                   android:layout_width="match_parent"
+                                   android:layout_height="wrap_content"
+                                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                                   android:id="@+id/cardView"
+                                   android:orientation="horizontal"
+                                   app:cardElevation="3dp"
+                                   app:cardCornerRadius="8dp"
+                                   android:layout_marginBottom="4dp"
+                                   android:layout_marginTop="4dp"
+                                   android:layout_marginEnd="4dp"
+                                   android:layout_marginStart="4dp"
+>
+
+    <RelativeLayout android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+    >
+
+        <ImageView android:layout_width="match_parent"
+                   android:layout_height="100dp"
+                   android:src="@drawable/pdf_icon"
+                   android:id="@+id/imageView"
+                   android:layout_centerVertical="true"
+                   android:layout_alignParentTop="true"
+        />
+
+        <LinearLayout
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/imageView"
+                android:orientation="vertical"
+                android:layout_centerHorizontal="true"
+        >
+                <TextView android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:id="@+id/txtName"
+                          android:text="File Name"
+                          android:textSize="16sp"
+                          android:singleLine="true"
+                          android:ellipsize="marquee"
+                          android:marqueeRepeatLimit="marquee_forever"
+                          android:scrollHorizontally="true"
+                          android:textColor="@color/black"
+                          android:focusable="true"
+                          android:focusableInTouchMode="true"
+                          android:freezesText="true"
+                          android:textAlignment="center"
+                />
+                <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                >
+                    <RelativeLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="true"
+                    >
+                        <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="1kb"
+                                android:id="@+id/txtViewFileSizeValue"
+                                android:singleLine="true"
+                                android:ellipsize="marquee"
+                                android:marqueeRepeatLimit="marquee_forever"
+                                android:scrollHorizontally="true"
+                                android:textSize="13sp"
+                                android:layout_alignParentStart="true"
+                        />
+                        <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/txtViewSeperator"
+                                android:layout_toEndOf="@+id/txtViewFileSizeValue"
+                                android:text="-"
+                                android:layout_marginStart="10dp"
+                        />
+                        <TextView
+                                android:id="@+id/txtViewCreationTimeValue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="1/1/1"
+                                android:singleLine="true"
+                                android:ellipsize="marquee"
+                                android:marqueeRepeatLimit="marquee_forever"
+                                android:scrollHorizontally="true"
+                                android:textSize="13sp"
+                                android:layout_toEndOf="@+id/txtViewSeperator"
+                                android:layout_marginStart="10dp"
+                        />
+                    </RelativeLayout>
+                </RelativeLayout>
+
+                <TextView
+                        android:id="@+id/txtViewDownloadFile"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/blue_pantone"
+                        android:text="Download"
+                        android:textSize="14sp"
+                        android:textAlignment="center"
+                />
+        </LinearLayout>
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>
