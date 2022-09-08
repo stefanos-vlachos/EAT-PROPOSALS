@@ -59,68 +59,40 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                 >
-                    <LinearLayout
+                    <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:id="@+id/layoutFileSize"
+                            android:text="1kb"
+                            android:id="@+id/txtViewFileSizeValue"
+                            android:singleLine="true"
+                            android:ellipsize="marquee"
+                            android:marqueeRepeatLimit="marquee_forever"
+                            android:scrollHorizontally="true"
+                            android:textSize="13sp"
                             android:layout_alignParentStart="true"
-                    >
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="File Size: "
-                                android:id="@+id/txtViewFileSize"
-
-                                android:singleLine="true"
-                                android:ellipsize="marquee"
-                                android:marqueeRepeatLimit="marquee_forever"
-                                android:scrollHorizontally="true"
-                                android:textSize="13sp"
-                        />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="1kb"
-                                android:id="@+id/txtViewFileSizeValue"
-                                android:singleLine="true"
-                                android:ellipsize="marquee"
-                                android:marqueeRepeatLimit="marquee_forever"
-                                android:scrollHorizontally="true"
-                                android:textSize="13sp"
-                        />
-
-                    </LinearLayout>
-                    <LinearLayout
+                    />
+                    <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:id="@+id/layoutUploadTime"
-                            android:layout_toEndOf="@+id/layoutFileSize"
+                            android:id="@+id/txtViewSeperator"
+                            android:layout_toEndOf="@+id/txtViewFileSizeValue"
+                            android:text="-"
                             android:layout_marginStart="10dp"
-                    >
-                        <TextView
-                                android:id="@+id/txtViewCreationTime"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Created On: "
+                    />
+                    <TextView
+                            android:id="@+id/txtViewCreationTimeValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1/1/1"
+                            android:singleLine="true"
+                            android:ellipsize="marquee"
+                            android:marqueeRepeatLimit="marquee_forever"
+                            android:scrollHorizontally="true"
+                            android:textSize="13sp"
+                            android:layout_toEndOf="@+id/txtViewSeperator"
+                            android:layout_marginStart="10dp"
+                    />
 
-                                android:singleLine="true"
-                                android:ellipsize="marquee"
-                                android:marqueeRepeatLimit="marquee_forever"
-                                android:scrollHorizontally="true"
-                                android:textSize="13sp"
-                        />
-                        <TextView
-                                android:id="@+id/txtViewCreationTimeValue"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="1/1/1"
-                                android:singleLine="true"
-                                android:ellipsize="marquee"
-                                android:marqueeRepeatLimit="marquee_forever"
-                                android:scrollHorizontally="true"
-                                android:textSize="13sp"
-                        />
-                    </LinearLayout>
                 </RelativeLayout>
             </LinearLayout>
             <TextView

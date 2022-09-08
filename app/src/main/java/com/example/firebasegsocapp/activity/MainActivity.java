@@ -1,8 +1,10 @@
 package com.example.firebasegsocapp.activity;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.database.Cursor;
@@ -32,6 +34,7 @@ import com.google.firebase.storage.*;
 import com.smarteist.autoimageslider.SliderView;
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -48,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
             "application/vnd.openxmlformats-officedocument.presentationml.presentation",
             "application/vnd.ms-powerpoint", "application/vnd.oasis.opendocument.text", "application/json",
             "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "text/csv", "text/html"
+            "text/csv", "text/html", "application/x-tex", "image/jpeg", "image/png"
     };
 
     private Button btnUploadFile;
@@ -231,16 +234,27 @@ public class MainActivity extends AppCompatActivity {
                     progressDialog.show();
 
                     pdfUri = data.getData();
-                    String fileName = getFileName(pdfUri);
-                    String fileExtension = getFileExtension(pdfUri);
+                    HashMap<String, String> fileInfo = new HashMap<>(getFileInfo(pdfUri));
+                    String fileName = fileInfo.get("fileName");
+                    String fileExtension = fileInfo.get("fileExtension");
 
-                    StorageReference reference = getStorageReference().child("pending-files").child(fileName + "." + fileExtension);
+                    StorageReference reference = getStorageReference().child("pending-files").child(fileName + fileExtension);
                     reference.putFile(pdfUri)
                             .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                 @Override
                                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                                     progressDialog.dismiss();
-                                    Toast.makeText(MainActivity.this, "Uploaded Succesfully", Toast.LENGTH_SHORT).show();
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                                    builder.setTitle("File Uploaded")
+                                            .setMessage("Your file is undergoing a review process.\nOnce it is approved, it will be available on the app.")
+                                            .setCancelable(false)
+                                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                }
+                                            });
+                                    AlertDialog alert = builder.create();
+                                    alert.show();
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
@@ -283,40 +297,41 @@ public class MainActivity extends AppCompatActivity {
 
     //method to compose the name of the uploaded files
     @SuppressLint("Range")
-    private String getFileName(Uri fileUri) {
+    private HashMap<String,String> getFileInfo(Uri fileUri) {
+        HashMap<String,String> fileInfo = new HashMap<>();
+        String filePath;
         String fileName = null;
+        String fileExtension = null;
         int cut;
 
         if(pdfUri.getScheme().equals("content")) {
             Cursor cursor = getContentResolver().query(pdfUri, null, null, null, null);
             try {
                 if( cursor != null && cursor.moveToFirst()) {
-                    fileName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
-                    cut = fileName.lastIndexOf('.');
-                    if(cut != -1)
-                        fileName = fileName.substring(0, cut);
-                    return fileName;
+                    filePath = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                    cut = filePath.lastIndexOf('.');
+                    if(cut != -1) {
+                        fileName = filePath.substring(0, cut);
+                        fileExtension = filePath.substring(cut);
+                    }
+                    fileInfo.put("fileName", fileName);
+                    fileInfo.put("fileExtension", fileExtension);
                 }
             } finally {
                 cursor.close();
             }
         }
         if (fileName == null) {
-            fileName = fileUri.getPath();
-            cut = fileName.lastIndexOf('/');
+            filePath = fileUri.getPath();
+            cut = filePath.lastIndexOf('/');
             if (cut != -1) {
-                fileName = fileName.substring(cut + 1);
+                fileName = filePath.substring(cut + 1);
+                fileInfo.put("fileName", fileName);
+                fileInfo.put("fileExtension", "");
             }
         }
 
-        return fileName;
-    }
-
-    private String getFileExtension(Uri fileUri){
-        ContentResolver cR = this.getContentResolver();
-        MimeTypeMap mime = MimeTypeMap.getSingleton();
-        String fileExtension = mime.getExtensionFromMimeType(cR.getType(fileUri));
-        return fileExtension;
+        return fileInfo;
     }
 
 }

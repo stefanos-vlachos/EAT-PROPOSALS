@@ -31,20 +31,24 @@ public class FilesAdapter extends
     private static HashMap<String, Integer> fileExtensionImages;
     static {
         fileExtensionImages = new HashMap<>();
-        fileExtensionImages.put("doc", R.drawable.word_icon);
-        fileExtensionImages.put("docx", R.drawable.word_icon);
-        fileExtensionImages.put("pdf", R.drawable.pdf_icon);
-        fileExtensionImages.put("xml", R.drawable.xml_icon);
-        fileExtensionImages.put("xlsx", R.drawable.xml_icon);
-        fileExtensionImages.put("xls", R.drawable.xml_icon);
-        fileExtensionImages.put("txt", R.drawable.txt_icon);
-        fileExtensionImages.put("rtf", R.drawable.document_icon);
-        fileExtensionImages.put("ppt", R.drawable.ppt_icon);
-        fileExtensionImages.put("pptx", R.drawable.ppt_icon);
-        fileExtensionImages.put("odt", R.drawable.document_icon);
-        fileExtensionImages.put("json", R.drawable.json_icon);
-        fileExtensionImages.put("csv", R.drawable.csv_icon);
-        fileExtensionImages.put("html", R.drawable.html_icon);
+        fileExtensionImages.put(".doc", R.drawable.word_icon);
+        fileExtensionImages.put(".docx", R.drawable.word_icon);
+        fileExtensionImages.put(".pdf", R.drawable.pdf_icon);
+        fileExtensionImages.put(".xml", R.drawable.xml_icon);
+        fileExtensionImages.put(".xlsx", R.drawable.xml_icon);
+        fileExtensionImages.put(".xls", R.drawable.xml_icon);
+        fileExtensionImages.put(".txt", R.drawable.txt_icon);
+        fileExtensionImages.put(".rtf", R.drawable.document_icon);
+        fileExtensionImages.put(".ppt", R.drawable.ppt_icon);
+        fileExtensionImages.put(".pptx", R.drawable.ppt_icon);
+        fileExtensionImages.put(".odt", R.drawable.document_icon);
+        fileExtensionImages.put(".json", R.drawable.json_icon);
+        fileExtensionImages.put(".csv", R.drawable.csv_icon);
+        fileExtensionImages.put(".html", R.drawable.html_icon);
+        fileExtensionImages.put(".jpeg", R.drawable.image_icon);
+        fileExtensionImages.put(".jpg", R.drawable.image_icon);
+        fileExtensionImages.put(".png", R.drawable.image_icon);
+        fileExtensionImages.put(".tex", R.drawable.document_icon);
     }
 
     public FilesAdapter(List<FirebaseFile> files) {
@@ -79,10 +83,10 @@ public class FilesAdapter extends
 
         setImageForFileExtension(imageView, firebaseFile.getFileType());
 
-        textView.setText(firebaseFile.getFileName() + "." + firebaseFile.getFileType());
+        textView.setText(firebaseFile.getFileName() + firebaseFile.getFileType());
         textView.setSelected(true);
 
-        fileSizeView.setText(firebaseFile.getFileSize() + "kB");
+        fileSizeView.setText(firebaseFile.getFileSize());
         fileSizeView.setSelected(true);
 
         createdOnView.setText(firebaseFile.getCreationTime());

@@ -19,6 +19,9 @@ import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import org.jetbrains.annotations.NotNull;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeFieldType;
+import org.joda.time.Instant;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -107,24 +110,16 @@ public class ViewFilesActivity extends AppCompatActivity {
 
     private void getFileMetadata(StorageReference fileReference){
         String filePath = fileReference.getPath();
-        int cut = filePath.lastIndexOf(".");
-        String fileName = filePath.substring(1,cut);
-        String fileType = filePath.substring(cut+1);
+        String fileName = filePath.substring(filePath.lastIndexOf("/" )+1, filePath.lastIndexOf("."));
+        String fileType = filePath.substring(filePath.lastIndexOf("."));
 
         fileReference.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
             @Override
             public void onSuccess(StorageMetadata storageMetadata) {
-                String fileSize = String.valueOf(storageMetadata.getSizeBytes() / 1000);
+                String fileSize = getFileSize(storageMetadata.getSizeBytes());
+                String fileUploadTime = getDateFromMilliseconds(storageMetadata.getCreationTimeMillis());
 
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(storageMetadata.getCreationTimeMillis());
-
-                int mYear = calendar.get(Calendar.YEAR);
-                int mMonth = calendar.get(Calendar.MONTH);
-                int mDay = calendar.get(Calendar.DAY_OF_MONTH);
-
-                String creationTime = mDay + "/" + mMonth + "/" + mYear;
-                firebaseFiles.add(new FirebaseFile(filePath, fileName, fileType, fileSize, creationTime));
+                firebaseFiles.add(new FirebaseFile(filePath, fileName, fileType, fileSize, fileUploadTime));
                 parsedFiles++;
                 if(parsedFiles == filesToParse)
                     configureRecyclerView();
@@ -157,7 +152,7 @@ public class ViewFilesActivity extends AppCompatActivity {
                 Collections.sort(firebaseFiles, new Comparator<FirebaseFile>() {
                     @Override
                     public int compare(FirebaseFile file1, FirebaseFile file2) {
-                        return Integer.compare(Integer.parseInt(file1.getFileSize()), Integer.parseInt(file2.getFileSize()));
+                        return file1.getFileSize().compareTo(file2.getFileSize());
                     }
                 });
                 adapter.notifyDataSetChanged();
@@ -182,6 +177,28 @@ public class ViewFilesActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 break;
         }
+    }
+
+    private String getDateFromMilliseconds(long milliseconds){
+        Instant instantFromEpochMilli = Instant.ofEpochMilli(milliseconds);
+        int year = instantFromEpochMilli.get(DateTimeFieldType.year());
+        int month = instantFromEpochMilli.get(DateTimeFieldType.monthOfYear());
+        int day = instantFromEpochMilli.get(DateTimeFieldType.dayOfMonth());
+        int hour = instantFromEpochMilli.get(DateTimeFieldType.hourOfDay());
+        int minute = instantFromEpochMilli.get(DateTimeFieldType.minuteOfHour());
+
+        return day + "/" + month + "/" + year + " " + hour + ":" + minute;
+    }
+    
+    private String getFileSize(long bytes){
+        Formatter fm=new Formatter();
+        if (bytes / 1024.0 < 1)
+            return bytes + "bytes";
+        else if(bytes / (1024.0*1024.0) < 1)
+            return fm.format("%.2f", bytes / 1024.0) + "kB";
+        else if(bytes / (1024.0*1024.0*1024.0) < 1)
+            return fm.format("%.2f", bytes / (1024.0*1024.0)) + "MB";
+        return fm.format("%.2f", bytes / (1024.0*1024.0*1024.0)) + "GB";
     }
 
     @Override
