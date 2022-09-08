@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
                     String fileName = getFileName(pdfUri);
                     String fileExtension = getFileExtension(pdfUri);
 
-                    StorageReference reference = getStorageReference().child(fileName + "." + fileExtension);
+                    StorageReference reference = getStorageReference().child("pending-files").child(fileName + "." + fileExtension);
                     reference.putFile(pdfUri)
                             .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                 @Override

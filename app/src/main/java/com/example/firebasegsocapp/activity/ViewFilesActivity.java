@@ -83,10 +83,16 @@ public class ViewFilesActivity extends AppCompatActivity {
 
     private void getFilesFromFirebase(){
         progressDialog.show();
-        storageReference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
+        storageReference.child("accepted-files").listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
             @Override
             public void onSuccess(ListResult listResult) {
                 filesToParse = listResult.getItems().size();
+                if(filesToParse==0){
+                    txtViewSortFiles.setVisibility(View.INVISIBLE);
+                    progressDialog.dismiss();
+                    return;
+                }
+                txtViewSortFiles.setVisibility(View.VISIBLE);
                 for(StorageReference fileReference : listResult.getItems()) {
                     getFileMetadata(fileReference);
                 }
