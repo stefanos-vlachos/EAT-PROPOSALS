@@ -1,5 +1,6 @@
 package com.example.firebasegsocapp.activity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -111,8 +112,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void cancelActivity(){
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(intent);
         finish();
     }
 
@@ -155,6 +154,8 @@ public class LoginActivity extends AppCompatActivity {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
                                                 getFirebaseAuth().signOut();
+                                                Intent resultIntent = new Intent();
+                                                setResult(Activity.RESULT_OK, resultIntent);
                                                 finish();
                                             }
                                         });
@@ -182,6 +183,8 @@ public class LoginActivity extends AppCompatActivity {
                     }
 
                     getFirebaseAuth().getCurrentUser().reload();
+                    Intent resultIntent = new Intent();
+                    setResult(Activity.RESULT_OK, resultIntent);
                     finish();
                 }
             }
