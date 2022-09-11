@@ -1,11 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                                   android:layout_width="match_parent"
-                                                   android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+>
+
+    <RelativeLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="#011638"
+            android:id="@+id/header"
+    >
+        <TextView
+                android:text="EAT-PROPOSALS"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView3"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="20dp"
+                android:textColor="@color/cultured"
+                android:textStyle="bold"
+                android:textSize="20sp"
+        />
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtViewLogin"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="20dp"
+                android:textColor="@color/cultured"
+                android:layout_centerVertical="true"
+                android:textSize="14sp"
+                android:text="Sign Up | Sign In"
+        />
+    </RelativeLayout>
+
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_below="@+id/header"
+            android:id="@+id/layoutFileOptions"
+    >
+        <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="Files"
+                android:textSize="20sp"
+                android:textColor="@color/oxford_blue"
+                android:textStyle="bold"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+        />
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@+id/txtViewChangeFilesView"
+                android:text="Sort Files"
+                android:textColor="@color/oxford_blue"
+                android:layout_centerVertical="true"
+                android:id="@+id/txtViewSortFiles"
+        />
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Grid View"
+                android:layout_alignParentEnd="true"
+                android:id="@+id/txtViewChangeFilesView"
+                android:layout_centerVertical="true"
+                android:textColor="@color/oxford_blue"
+                android:layout_marginStart="15dp"
+        />
+    </RelativeLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvFiles"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_below="@+id/layoutFileOptions"
+    />
 
-</LinearLayout>
+    <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="invisible"
+            android:id="@+id/layoutNoFilesFound"
+            android:layout_centerInParent="true"
+    >
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/no_files_icon"
+                android:id="@+id/imgNoFilesFound"
+                android:layout_centerHorizontal="true"
+        />
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No files found."
+                android:textSize="20sp"
+                android:textColor="@color/oxford_blue"
+                android:layout_marginTop="10dp"
+                android:layout_below="@+id/imgNoFilesFound"
+        />
+    </RelativeLayout>
+
+</RelativeLayout>

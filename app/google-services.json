@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "489697442067",
+    "firebase_url": "https://gsoc-app-default-rtdb.firebaseio.com",
     "project_id": "gsoc-app",
     "storage_bucket": "gsoc-app.appspot.com"
   },
@@ -13,6 +14,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "489697442067-prh9v4tgjbhcgitjvg15ofutefs2pe7r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.firebasegsocapp",
+            "certificate_hash": "418009051a184ff86d5ba3a1cbf522ce3336dbd1"
+          }
+        },
         {
           "client_id": "489697442067-qq7iqnt93q51q7tkg7ivur2ivtongk64.apps.googleusercontent.com",
           "client_type": 3

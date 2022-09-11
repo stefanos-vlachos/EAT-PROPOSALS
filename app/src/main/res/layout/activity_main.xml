@@ -1,20 +1,139 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
         android:orientation="vertical"
-        tools:context=".MainActivity">
+        tools:context=".activity.MainActivity"
+>
 
-    <Button
-            android:text="Upload a file"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:id="@+id/uploadButton"/>
-    <Button
-            android:text="view files"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:id="@+id/viewButton"/>
+    <RelativeLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="#011638"
+            android:id="@+id/header"
+    >
+        <TextView
+                android:text="EAT-PROPOSALS"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView3"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="20dp"
+                android:textColor="@color/cultured"
+                android:textStyle="bold"
+                android:textSize="20sp"
+        />
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtViewLogin"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="20dp"
+                android:textColor="@color/cultured"
+                android:layout_centerVertical="true"
+                android:textSize="14sp"
+                android:text="Sign Up | Sign In"
+        />
+    </RelativeLayout>
+
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:context=".activity.MainActivity"
+            android:id="@+id/slideshow"
+            android:layout_weight="100"
+    >
+        <TextView
+                android:text="Welcome to EAT-PROPOSALS."
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView4"
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                android:layout_above="@id/slider"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="30dp"
+                android:textStyle="bold"
+        />
+
+        <com.smarteist.autoimageslider.SliderView
+                android:id="@+id/slider"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                app:sliderAnimationDuration="600"
+                android:layout_centerInParent="true"
+                app:sliderAutoCycleDirection="right"
+                app:sliderIndicatorAnimationDuration="600"
+                app:sliderIndicatorEnabled="true"
+                app:sliderIndicatorGravity="center_horizontal|bottom"
+                app:sliderIndicatorMargin="15dp"
+                app:sliderIndicatorOrientation="horizontal"
+                app:sliderIndicatorPadding="3dp"
+                app:sliderIndicatorRadius="2dp"
+                app:sliderIndicatorSelectedColor="#22223B"
+                app:sliderIndicatorUnselectedColor="#F2E9E4"
+                app:sliderScrollTimeInSec="1"
+        >
+        </com.smarteist.autoimageslider.SliderView>
+
+        <TextView
+                android:text=""
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtViewLearnMore"
+                android:layout_below="@id/slider"
+                android:layout_marginTop="25dp"
+                android:layout_centerHorizontal="true"
+        />
+
+    </RelativeLayout>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:background="#011638"
+            android:id="@+id/footer"
+    >
+
+        <GridLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:rowCount="1"
+                android:columnCount="2"
+                android:useDefaultMargins="true"
+        >
+            <Button
+                    android:text="View files"
+                    android:layout_width="90dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/btnViewFiles"
+                    android:layout_column="0"
+                    android:layout_row="0"
+                    android:textAllCaps="false"
+                    android:textColor="@color/eerie_black"
+                    android:backgroundTint="@color/cultured"
+            />
+            <Button
+                    android:text="Upload file"
+                    android:layout_width="90dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/btnUploadFile"
+                    android:layout_column="1"
+                    android:layout_row="0"
+                    android:textColor="@color/eerie_black"
+                    android:backgroundTint="@color/cultured"
+                    android:textAllCaps="false"
+            />
+        </GridLayout>
+    </LinearLayout>
+
 
 </LinearLayout>
