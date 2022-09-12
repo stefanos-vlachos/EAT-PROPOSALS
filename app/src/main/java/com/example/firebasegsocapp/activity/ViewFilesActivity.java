@@ -5,53 +5,53 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.example.firebasegsocapp.adapter.FileViewRenderer;
 import com.example.firebasegsocapp.adapter.FilesAdapter;
+import com.example.firebasegsocapp.adapter.FolderViewRenderer;
 import com.example.firebasegsocapp.domain.FirebaseFile;
 import com.example.firebasegsocapp.R;
+import com.example.firebasegsocapp.domain.FirebaseFolder;
+import com.example.firebasegsocapp.domain.FirebaseReference;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import org.jetbrains.annotations.NotNull;
-import org.joda.time.DateTimeFieldType;
-import org.joda.time.Instant;
 
 import java.util.*;
 
 import static com.example.firebasegsocapp.activity.MainActivity.getFirebaseAuth;
 import static com.example.firebasegsocapp.activity.MainActivity.getStorageReference;
 
-public class ViewFilesActivity extends AppCompatActivity {
+public class ViewFilesActivity<T extends FirebaseReference> extends AppCompatActivity {
 
-    private static int filesToParse;
-    private static int parsedFiles = 0;
-    private static ProgressDialog progressDialog;
+    private final String[] sortItems = new String[]{"File Name", "File Size", "Upload Date", "File Type"};
+    private final int[] checkedItem = {-1};
+
     private static String viewType = "list";
     private final int LOGIN_ACTIVITY_CODE = 1;
+    private static int parsedReferences = 0;
+    private static int referencesToParse;
+    private static ProgressDialog progressDialog;
 
     private StorageReference storageReference;
+    private List<T> firebaseReferences;
     private List<FirebaseFile> firebaseFiles;
+    private List<FirebaseFolder> firebaseFolders;
     private RecyclerView rvFiles;
-    private FilesAdapter adapter;
-
+    private FilesAdapter mRecyclerViewAdapter;
     private TextView txtViewLogin;
     private TextView txtViewSortFiles;
     private TextView txtViewChangeViewFiles;
     private RelativeLayout layoutFileOptions;
-
-    private final String[] sortItems = new String[]{"File Name", "File Size", "Upload Date", "File Type"};
-    private final int[] checkedItem = {-1};
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -68,7 +68,10 @@ public class ViewFilesActivity extends AppCompatActivity {
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Loading files...");
         storageReference = getStorageReference();
+        firebaseReferences = new ArrayList<>();
         firebaseFiles= new ArrayList<>();
+        firebaseFolders = new ArrayList<>();
+        mRecyclerViewAdapter = new FilesAdapter(firebaseReferences);
         rvFiles = findViewById(R.id.rvFiles);
         txtViewLogin = findViewById((R.id.txtViewLogin));
         txtViewSortFiles = findViewById(R.id.txtViewSortFiles);
@@ -143,8 +146,8 @@ public class ViewFilesActivity extends AppCompatActivity {
         storageReference.child("accepted-files").listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
             @Override
             public void onSuccess(ListResult listResult) {
-                filesToParse = listResult.getItems().size();
-                if(filesToParse==0){
+                referencesToParse = listResult.getItems().size() + listResult.getPrefixes().size();
+                if(referencesToParse==0){
                     txtViewSortFiles.setEnabled(false);
                     txtViewSortFiles.setTextColor(getResources().getColor(R.color.cultured));
                     txtViewChangeViewFiles.setEnabled(false);
@@ -154,6 +157,23 @@ public class ViewFilesActivity extends AppCompatActivity {
                     progressDialog.dismiss();
                     return;
                 }
+
+                //Parse folders
+                for(StorageReference folderReference : listResult.getPrefixes()) {
+                    String folderPath = folderReference.getPath();
+                    FirebaseFolder firebaseFolder = new FirebaseFolder();
+                    firebaseFolder.setReferencePath(folderPath);
+                    firebaseFolder.setReferenceName(folderPath);
+                    firebaseFolders.add(firebaseFolder);
+                    parsedReferences++;
+                    if(parsedReferences == referencesToParse) {
+                        firebaseReferences.addAll((ArrayList<T>)firebaseFolders);
+                        firebaseReferences.addAll((ArrayList<T>)firebaseFiles);
+                        registerRenderers();
+                        configureRecyclerView();
+                    }
+                }
+                //Parse files
                 for(StorageReference fileReference : listResult.getItems()) {
                     getFileMetadata(fileReference);
                 }
@@ -169,55 +189,72 @@ public class ViewFilesActivity extends AppCompatActivity {
 
     private void getFileMetadata(StorageReference fileReference){
         String filePath = fileReference.getPath();
-        String fileName = filePath.substring(filePath.lastIndexOf("/" )+1, filePath.lastIndexOf("."));
-        String fileType = filePath.substring(filePath.lastIndexOf("."));
 
         fileReference.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
             @Override
             public void onSuccess(StorageMetadata storageMetadata) {
-                String fileSize = getFileSize(storageMetadata.getSizeBytes());
-                String fileUploadTime = getDateFromMilliseconds(storageMetadata.getCreationTimeMillis());
+                FirebaseFile firebaseFile = new FirebaseFile();
+                firebaseFile.setReferencePath(filePath);
+                firebaseFile.setReferenceName(filePath);
+                firebaseFile.setReferenceType(filePath);
+                firebaseFile.setReferenceSize(storageMetadata.getSizeBytes());
+                firebaseFile.setCreationTime(storageMetadata.getCreationTimeMillis());
 
-                firebaseFiles.add(new FirebaseFile(filePath, fileName, fileType, fileSize, fileUploadTime));
-                parsedFiles++;
-                if(parsedFiles == filesToParse)
+                firebaseFiles.add(firebaseFile);
+                parsedReferences++;
+                if(parsedReferences == referencesToParse) {
+                    firebaseReferences.addAll((ArrayList<T>)firebaseFolders);
+                    firebaseReferences.addAll((ArrayList<T>)firebaseFiles);
+                    registerRenderers();
                     configureRecyclerView();
+                }
             }
         });
     }
 
+    private void registerRenderers(){
+        mRecyclerViewAdapter.registerRenderer(new FileViewRenderer(0, this));
+        mRecyclerViewAdapter.registerRenderer(new FolderViewRenderer(1, this));
+    }
+
     private void configureRecyclerView(){
+
+        mRecyclerViewAdapter.setViewType(viewType);
+
         if(viewType.equals("list"))
             rvFiles.setLayoutManager(new GridLayoutManager(this, 1));
         else
             rvFiles.setLayoutManager(new GridLayoutManager(this, 2));
-        adapter = new FilesAdapter(firebaseFiles, viewType);
-        rvFiles.setAdapter(adapter);
+
+        rvFiles.setAdapter(mRecyclerViewAdapter);
         progressDialog.dismiss();
     }
 
     private void sortFiles(int sortSelection){
-
         switch (sortSelection){
             case 0:
-                Toast.makeText(this, "Sorting Name", Toast.LENGTH_SHORT).show();
                 Collections.sort(firebaseFiles, new Comparator<FirebaseFile>() {
                     @Override
                     public int compare(FirebaseFile file1, FirebaseFile file2) {
-                        return file1.getFileName().compareTo(file2.getFileName());
+                        return file1.getReferenceName().compareTo(file2.getReferenceName());
                     }
                 });
-                adapter.notifyDataSetChanged();
+                Collections.sort(firebaseFolders, new Comparator<FirebaseFolder>() {
+                    @Override
+                    public int compare(FirebaseFolder folder1, FirebaseFolder folder2) {
+                        return folder1.getReferenceName().compareTo(folder2.getReferenceName());
+                    }
+                });
+                refreshListAdapterState();
                 break;
             case 1:
-                Toast.makeText(this, "Sorting Size", Toast.LENGTH_SHORT).show();
                 Collections.sort(firebaseFiles, new Comparator<FirebaseFile>() {
                     @Override
                     public int compare(FirebaseFile file1, FirebaseFile file2) {
-                        return file1.getFileSize().compareTo(file2.getFileSize());
+                        return file1.getReferenceSize().compareTo(file2.getReferenceSize());
                     }
                 });
-                adapter.notifyDataSetChanged();
+                refreshListAdapterState();
                 break;
             case 2:
                 Collections.sort(firebaseFiles, new Comparator<FirebaseFile>(){
@@ -226,41 +263,25 @@ public class ViewFilesActivity extends AppCompatActivity {
                         return file1.getCreationTime().compareTo(file2.getCreationTime());
                     }
                 });
-                adapter.notifyDataSetChanged();
+                refreshListAdapterState();
                 break;
             case 3:
-                Toast.makeText(this, "Sorting Type", Toast.LENGTH_SHORT).show();
                 Collections.sort(firebaseFiles, new Comparator<FirebaseFile>() {
                     @Override
                     public int compare(FirebaseFile file1, FirebaseFile file2) {
-                        return file1.getFileType().compareTo(file2.getFileType());
+                        return file1.getReferenceType().compareTo(file2.getReferenceType());
                     }
                 });
-                adapter.notifyDataSetChanged();
+                refreshListAdapterState();
                 break;
         }
     }
 
-    private String getDateFromMilliseconds(long milliseconds){
-        Instant instantFromEpochMilli = Instant.ofEpochMilli(milliseconds);
-        int year = instantFromEpochMilli.get(DateTimeFieldType.year());
-        int month = instantFromEpochMilli.get(DateTimeFieldType.monthOfYear());
-        int day = instantFromEpochMilli.get(DateTimeFieldType.dayOfMonth());
-        int hour = instantFromEpochMilli.get(DateTimeFieldType.hourOfDay());
-        int minute = instantFromEpochMilli.get(DateTimeFieldType.minuteOfHour());
-
-        return day + "/" + month + "/" + year + " " + hour + ":" + minute;
-    }
-    
-    private String getFileSize(long bytes){
-        Formatter fm=new Formatter();
-        if (bytes / 1024.0 < 1)
-            return bytes + "bytes";
-        else if(bytes / (1024.0*1024.0) < 1)
-            return fm.format("%.2f", bytes / 1024.0) + "kB";
-        else if(bytes / (1024.0*1024.0*1024.0) < 1)
-            return fm.format("%.2f", bytes / (1024.0*1024.0)) + "MB";
-        return fm.format("%.2f", bytes / (1024.0*1024.0*1024.0)) + "GB";
+    private void refreshListAdapterState(){
+        firebaseReferences.clear();
+        firebaseReferences.addAll((ArrayList<T>)firebaseFolders);
+        firebaseReferences.addAll((ArrayList<T>)firebaseFiles);
+        mRecyclerViewAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -277,7 +298,7 @@ public class ViewFilesActivity extends AppCompatActivity {
     @Override
     public void onBackPressed(){
         super.onBackPressed();
-        filesToParse = 0;
-        parsedFiles = 0;
+        referencesToParse = 0;
+        parsedReferences = 0;
     }
 }
