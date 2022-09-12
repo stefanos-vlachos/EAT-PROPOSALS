@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -53,6 +54,8 @@ public class ViewFilesActivity<T extends FirebaseReference> extends AppCompatAct
     private TextView txtViewChangeViewFiles;
     private RelativeLayout layoutFileOptions;
 
+    private String openFolder;
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -65,6 +68,7 @@ public class ViewFilesActivity<T extends FirebaseReference> extends AppCompatAct
     }
 
     private void init(){
+        openFolder="accepted-files";
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Loading files...");
         storageReference = getStorageReference();
@@ -138,15 +142,19 @@ public class ViewFilesActivity<T extends FirebaseReference> extends AppCompatAct
                 startActivityForResult(intent, LOGIN_ACTIVITY_CODE);
             }
         });
-
     }
 
     private void getFilesFromFirebase(){
         progressDialog.show();
-        storageReference.child("accepted-files").listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
+        Intent intent = getIntent();
+        if(intent.getStringExtra("folder-name")!=null)
+            openFolder=intent.getStringExtra("folder-name");
+
+        storageReference.child(openFolder).listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
             @Override
             public void onSuccess(ListResult listResult) {
                 referencesToParse = listResult.getItems().size() + listResult.getPrefixes().size();
+
                 if(referencesToParse==0){
                     txtViewSortFiles.setEnabled(false);
                     txtViewSortFiles.setTextColor(getResources().getColor(R.color.cultured));
@@ -167,6 +175,7 @@ public class ViewFilesActivity<T extends FirebaseReference> extends AppCompatAct
                     firebaseFolders.add(firebaseFolder);
                     parsedReferences++;
                     if(parsedReferences == referencesToParse) {
+                        parsedReferences=0;
                         firebaseReferences.addAll((ArrayList<T>)firebaseFolders);
                         firebaseReferences.addAll((ArrayList<T>)firebaseFiles);
                         registerRenderers();
@@ -183,6 +192,9 @@ public class ViewFilesActivity<T extends FirebaseReference> extends AppCompatAct
         .addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull @NotNull Exception e) {
+                progressDialog.dismiss();
+                Toast.makeText(ViewFilesActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                finish();
             }
         });
     }
@@ -193,6 +205,7 @@ public class ViewFilesActivity<T extends FirebaseReference> extends AppCompatAct
         fileReference.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
             @Override
             public void onSuccess(StorageMetadata storageMetadata) {
+
                 FirebaseFile firebaseFile = new FirebaseFile();
                 firebaseFile.setReferencePath(filePath);
                 firebaseFile.setReferenceName(filePath);
@@ -202,12 +215,22 @@ public class ViewFilesActivity<T extends FirebaseReference> extends AppCompatAct
 
                 firebaseFiles.add(firebaseFile);
                 parsedReferences++;
+
                 if(parsedReferences == referencesToParse) {
+                    parsedReferences=0;
                     firebaseReferences.addAll((ArrayList<T>)firebaseFolders);
                     firebaseReferences.addAll((ArrayList<T>)firebaseFiles);
                     registerRenderers();
                     configureRecyclerView();
                 }
+            }
+        })
+        .addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull @NotNull Exception e) {
+                progressDialog.dismiss();
+                Toast.makeText(ViewFilesActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                finish();
             }
         });
     }
@@ -218,7 +241,6 @@ public class ViewFilesActivity<T extends FirebaseReference> extends AppCompatAct
     }
 
     private void configureRecyclerView(){
-
         mRecyclerViewAdapter.setViewType(viewType);
 
         if(viewType.equals("list"))
