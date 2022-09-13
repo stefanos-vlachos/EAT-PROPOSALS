@@ -2,8 +2,10 @@ package com.example.firebasegsocapp.adapter;
 
 import android.app.AlertDialog;
 import android.app.DownloadManager;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import com.example.firebasegsocapp.R;
 import com.example.firebasegsocapp.domain.FirebaseFile;
 import com.google.firebase.storage.FirebaseStorage;
@@ -30,8 +33,8 @@ public class FileViewRenderer extends ViewRenderer<FirebaseFile, FileViewHolder>
         fileExtensionImages.put(".docx", R.drawable.word_icon);
         fileExtensionImages.put(".pdf", R.drawable.pdf_icon);
         fileExtensionImages.put(".xml", R.drawable.xml_icon);
-        fileExtensionImages.put(".xlsx", R.drawable.xml_icon);
-        fileExtensionImages.put(".xls", R.drawable.xml_icon);
+        fileExtensionImages.put(".xlsx", R.drawable.xls_icon);
+        fileExtensionImages.put(".xls", R.drawable.xls_icon);
         fileExtensionImages.put(".txt", R.drawable.txt_icon);
         fileExtensionImages.put(".rtf", R.drawable.document_icon);
         fileExtensionImages.put(".ppt", R.drawable.ppt_icon);
@@ -46,6 +49,30 @@ public class FileViewRenderer extends ViewRenderer<FirebaseFile, FileViewHolder>
         fileExtensionImages.put(".tex", R.drawable.document_icon);
     }
 
+    private static HashMap<String, String> fileExtensionsMimes;
+    static {
+        fileExtensionsMimes = new HashMap<>();
+        fileExtensionsMimes.put(".doc", "application/msword");
+        fileExtensionsMimes.put(".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        fileExtensionsMimes.put(".pdf", "application/pdf");
+        fileExtensionsMimes.put(".xml", "application/xml");
+        fileExtensionsMimes.put(".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        fileExtensionsMimes.put(".xls", "application/vnd.ms-excel");
+        fileExtensionsMimes.put(".txt", "text/plain");
+        fileExtensionsMimes.put(".rtf", "application/rtf");
+        fileExtensionsMimes.put(".ppt", "application/vnd.ms-powerpoint");
+        fileExtensionsMimes.put(".pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation");
+        fileExtensionsMimes.put(".odt", "application/vnd.oasis.opendocument.text");
+        fileExtensionsMimes.put(".json", "application/json");
+        fileExtensionsMimes.put(".csv", "text/csv");
+        fileExtensionsMimes.put(".html", "text/html");
+        fileExtensionsMimes.put(".jpeg", "image/jpeg");
+        fileExtensionsMimes.put(".jpg", "image/jpeg");
+        fileExtensionsMimes.put(".png", "image/png");
+        fileExtensionsMimes.put(".tex", "application/x-tex");
+    }
+
+
     public FileViewRenderer(final int type, final Context context) {
         super(type, context);
     }
@@ -59,6 +86,7 @@ public class FileViewRenderer extends ViewRenderer<FirebaseFile, FileViewHolder>
         TextView downloadView = fileViewHolder.downloadView;
         TextView fileSizeView = fileViewHolder.fileSizeView;
         TextView createdOnView = fileViewHolder.createdOnView;
+        CardView cardView = fileViewHolder.cardView;
 
         setImageForFileExtension(imageView, firebaseFile.getReferenceType());
 
@@ -98,6 +126,26 @@ public class FileViewRenderer extends ViewRenderer<FirebaseFile, FileViewHolder>
                 AlertDialog alert = builder.create();
                 alert.setTitle("Download File");
                 alert.show();
+            }
+        });
+
+        cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(firebaseFile.getReferencePath());
+                storageReference.getDownloadUrl().addOnSuccessListener(uri -> {
+                    String url = uri.toString();
+
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(Uri.parse(url), fileExtensionsMimes.get(firebaseFile.getReferenceType()));
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    Intent newIntent = Intent.createChooser(intent, "Open File");
+                    try {
+                        context.startActivity(newIntent);
+                    } catch (ActivityNotFoundException e) {
+                    }
+
+                });
             }
         });
     }
