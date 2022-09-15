@@ -53,19 +53,20 @@ public class MainActivity extends AppCompatActivity {
             "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             "text/csv", "text/html", "application/x-tex", "image/jpeg", "image/png"
     };
+    private static int filesToUpload;
+    private static int uploadedFiles;
+    private ProgressDialog progressDialog;
 
     private Button btnUploadFile;
     private Button btnViewFiles;
     private TextView txtViewLearnMore;
     private TextView txtViewLogin;
-    private Uri pdfUri;
     private SignInClient oneTapClient;
     private BeginSignInRequest signInRequest;
 
     public static FirebaseAuth getFirebaseAuth() {
         return FIREBASE_AUTH;
     }
-
     public static StorageReference getStorageReference() {
         return STORAGE_REFERENCE;
     }
@@ -81,6 +82,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init() {
+
+        progressDialog = new ProgressDialog(this);
         txtViewLogin = findViewById(R.id.txtViewLogin);
         btnUploadFile = findViewById(R.id.btnUploadFile);
         btnViewFiles = findViewById(R.id.btnViewFiles);
@@ -133,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
                     intent.setType("*/*");
                     intent.putExtra(Intent.EXTRA_MIME_TYPES, MIME_TYPES);
                     intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
                     startActivityForResult(Intent.createChooser(intent, "Select Document"), UPLOAD_FILES_ACTIVITY_CODE);
                     return;
                 }
@@ -228,42 +231,27 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode){
             case UPLOAD_FILES_ACTIVITY_CODE:
-                if(resultCode == RESULT_OK && data.getData()!=null) {
-                    final ProgressDialog progressDialog = new ProgressDialog(this);
-                    progressDialog.setMessage("Uploading");
-                    progressDialog.show();
+                if(resultCode == RESULT_OK) {
+                    //Handle multiple files
+                    if(data.getClipData() != null){
+                        progressDialog.setMessage("Uploading files ...");
+                        progressDialog.show();
 
-                    pdfUri = data.getData();
-                    HashMap<String, String> fileInfo = new HashMap<>(getFileInfo(pdfUri));
-                    String fileName = fileInfo.get("fileName");
-                    String fileExtension = fileInfo.get("fileExtension");
+                        filesToUpload = data.getClipData().getItemCount();
+                        for(int i=0; i<filesToUpload; i++){
+                            Uri fileUri = data.getClipData().getItemAt(i).getUri();
+                            uploadFile(fileUri);
+                        }
+                    }
+                    //Handle single file
+                    else if(data.getData() != null){
+                        progressDialog.setMessage("Uploading file ...");
+                        progressDialog.show();
 
-                    StorageReference reference = getStorageReference().child("pending-files").child(fileName + fileExtension);
-                    reference.putFile(pdfUri)
-                            .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                @Override
-                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                    progressDialog.dismiss();
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                                    builder.setTitle("File Uploaded")
-                                            .setMessage("Your file is undergoing a review process.\nOnce it is approved, it will be available on the app.")
-                                            .setCancelable(false)
-                                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                }
-                                            });
-                                    AlertDialog alert = builder.create();
-                                    alert.show();
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    progressDialog.dismiss();
-                                    Toast.makeText(MainActivity.this, "File upload failed.Try again", Toast.LENGTH_SHORT).show();
-                                }
-                            });
+                        filesToUpload = 1;
+                        Uri fileUri = data.getData();
+                        uploadFile(fileUri);
+                    }
                 }
                 break;
             /*case ONE_TAP_REGISTRATION_CODE:
@@ -295,6 +283,54 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void uploadFile(Uri fileUri){
+        uploadedFiles = 0;
+        final String dialogTitle;
+        final String dialogSuccessMessage;
+        final String dialogErrorMessage;
+        if(filesToUpload > 1){
+            dialogTitle = "Files Uploaded";
+            dialogSuccessMessage = "Your files are undergoing a review process.\nOnce they are approved, they will be available on the app.";
+            dialogErrorMessage = "Files upload failed. Try again.";
+        } else{
+            dialogTitle = "File Uploaded";
+            dialogSuccessMessage = "Your file is undergoing a review process.\nOnce it is approved, it will be available on the app.";
+            dialogErrorMessage = "File upload failed. Try again.";
+        }
+        HashMap<String, String> fileInfo = new HashMap<>(getFileInfo(fileUri));
+        String fileName = fileInfo.get("fileName");
+        String fileExtension = fileInfo.get("fileExtension");
+        StorageReference reference = getStorageReference().child("pending-files").child(fileName + fileExtension);
+        reference.putFile(fileUri)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        uploadedFiles++;
+                        if(uploadedFiles == filesToUpload){
+                            progressDialog.dismiss();
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                            builder.setTitle(dialogTitle)
+                                    .setMessage(dialogSuccessMessage)
+                                    .setCancelable(false)
+                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                        }
+                                    });
+                            AlertDialog alert = builder.create();
+                            alert.show();
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        progressDialog.dismiss();
+                        Toast.makeText(MainActivity.this, dialogErrorMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
     //method to compose the name of the uploaded files
     @SuppressLint("Range")
     private HashMap<String,String> getFileInfo(Uri fileUri) {
@@ -304,8 +340,8 @@ public class MainActivity extends AppCompatActivity {
         String fileExtension = null;
         int cut;
 
-        if(pdfUri.getScheme().equals("content")) {
-            Cursor cursor = getContentResolver().query(pdfUri, null, null, null, null);
+        if(fileUri.getScheme().equals("content")) {
+            Cursor cursor = getContentResolver().query(fileUri, null, null, null, null);
             try {
                 if( cursor != null && cursor.moveToFirst()) {
                     filePath = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
