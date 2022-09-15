@@ -2,6 +2,7 @@ package com.example.firebasegsocapp.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -32,18 +33,15 @@ import static com.example.firebasegsocapp.activity.MainActivity.getFirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
 
-    TextInputEditText edtTextLoginEmail;
-    TextInputEditText edtTextLoginPassword;
-    Button buttonLogin;
-    TextView txtViewLoginAltMethod;
-    TextView txtViewCancelLogin;
-    TextView txtViewLoginTitle;
-    TextView txtViewLoginShowPassword;
-    FirebaseAuth firebaseAuth;
-
-    private static final int REQ_ONE_TAP = 2;  // Can be any integer unique to the Activity.
-    private boolean showOneTapUI = true;
-
+    private TextInputEditText edtTextLoginEmail;
+    private TextInputEditText edtTextLoginPassword;
+    private Button buttonLogin;
+    private TextView txtViewLoginAltMethod;
+    private TextView txtViewCancelLogin;
+    private TextView txtViewLoginTitle;
+    private TextView txtViewLoginShowPassword;
+    private FirebaseAuth firebaseAuth;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,10 +54,11 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        cancelActivity();
+        finish();
     }
 
     private void init() {
+        progressDialog = new ProgressDialog(this);
         firebaseAuth = MainActivity.getFirebaseAuth();
         txtViewCancelLogin = findViewById(R.id.txtViewCancelLogin);
         txtViewLoginTitle = findViewById(R.id.txtViewLoginTitle);
@@ -74,7 +73,7 @@ public class LoginActivity extends AppCompatActivity {
         txtViewCancelLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cancelActivity();
+                finish();
             }
         });
 
@@ -96,23 +95,23 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String username = edtTextLoginEmail.getText().toString();
                 String password = edtTextLoginPassword.getText().toString();
-                if(checkUserInput(username, password))
+                if(checkUserInput(username, password)) {
+                    progressDialog.setMessage("Logging in ...");
+                    progressDialog.show();
                     signIn(username, password);
+                }
             }
         });
 
         txtViewLoginAltMethod.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), CreateAccountActivity.class);
-                startActivity(intent);
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("message", "switch_signup");
+                setResult(Activity.RESULT_OK, resultIntent);
                 finish();
             }
         });
-    }
-
-    private void cancelActivity(){
-        finish();
     }
 
     private boolean checkUserInput (String email, String password) {
@@ -138,7 +137,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signIn(String email, String password) {
-
         firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -155,7 +153,9 @@ public class LoginActivity extends AppCompatActivity {
                                             public void onClick(DialogInterface dialog, int which) {
                                                 getFirebaseAuth().signOut();
                                                 Intent resultIntent = new Intent();
+                                                resultIntent.putExtra("message","login_complete");
                                                 setResult(Activity.RESULT_OK, resultIntent);
+                                                progressDialog.dismiss();
                                                 finish();
                                             }
                                         });
@@ -163,10 +163,11 @@ public class LoginActivity extends AppCompatActivity {
                                 alert.show();
                                 return;
                             }
-
                             checkIfFirstLogin(email, user.getUid());
-                        } else
+                        } else {
+                            progressDialog.dismiss();
                             handleLoginErrors(task.getException().getLocalizedMessage());
+                        }
                     }
                 });
     }
@@ -177,40 +178,47 @@ public class LoginActivity extends AppCompatActivity {
             public void onComplete(@NonNull @NotNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
                     DocumentSnapshot doc = task.getResult();
-                    if(doc.exists()){
-                        FIREBASE_FIRESTORE.collection("pending_users").document(email).delete();
+                    if(doc.exists())
                         storeVerifiedUser(updatedId, doc.getString("email"), doc.getString("username"));
+                    else{
+                        Intent resultIntent = new Intent();
+                        resultIntent.putExtra("message","login_complete");
+                        setResult(Activity.RESULT_OK, resultIntent);
+                        progressDialog.dismiss();
+                        finish();
                     }
-
-                    getFirebaseAuth().getCurrentUser().reload();
-                    Intent resultIntent = new Intent();
-                    setResult(Activity.RESULT_OK, resultIntent);
-                    finish();
                 }
+            }
+        })
+        .addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull @NotNull Exception e) {
+                progressDialog.dismiss();
+                Toast.makeText(LoginActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void storeVerifiedUser(String userIdToken, String userEmail, String userFullName){
-        //Store in Firebase Real Time Database
-        /*FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference users = database.getReference("users");
-        User user = new User(userIdToken, userEmail, userFullName);
-        users.push().setValue(user);*/
-
         //Store in Firebase Cloud Firestore
         FIREBASE_FIRESTORE.collection("users").document(userEmail)
                 .set(new User(userIdToken, userEmail, userFullName))
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
+                        FIREBASE_FIRESTORE.collection("pending_users").document(userEmail).delete();
+                        Intent resultIntent = new Intent();
+                        resultIntent.putExtra("message","login_complete");
+                        setResult(Activity.RESULT_OK, resultIntent);
+                        progressDialog.dismiss();
                         finish();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull @NotNull Exception e) {
-                        Toast.makeText(LoginActivity.this, "User Storage Failed", Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss();
+                        Toast.makeText(LoginActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }

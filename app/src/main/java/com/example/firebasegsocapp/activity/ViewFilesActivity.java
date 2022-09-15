@@ -9,7 +9,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,10 +25,7 @@ import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.*;
-
-import static com.example.firebasegsocapp.activity.MainActivity.getFirebaseAuth;
 import static com.example.firebasegsocapp.activity.MainActivity.getStorageReference;
 
 public class ViewFilesActivity<T extends FirebaseReference> extends AppCompatActivity {
@@ -38,7 +34,6 @@ public class ViewFilesActivity<T extends FirebaseReference> extends AppCompatAct
     private final int[] checkedItem = {-1};
 
     private static String viewType = "list";
-    private final int LOGIN_ACTIVITY_CODE = 1;
     private static int parsedReferences = 0;
     private static int referencesToParse;
     private static ProgressDialog progressDialog;
@@ -49,7 +44,7 @@ public class ViewFilesActivity<T extends FirebaseReference> extends AppCompatAct
     private List<FirebaseFolder> firebaseFolders;
     private RecyclerView rvFiles;
     private FilesAdapter mRecyclerViewAdapter;
-    private TextView txtViewLogin;
+    private TextView txtViewReturn;
     private TextView txtViewSortFiles;
     private TextView txtViewChangeViewFiles;
     private RelativeLayout layoutFileOptions;
@@ -63,7 +58,6 @@ public class ViewFilesActivity<T extends FirebaseReference> extends AppCompatAct
 
         init();
         setListeners();
-        updateRegisterDependentElements();
         getFilesFromFirebase();
     }
 
@@ -77,7 +71,7 @@ public class ViewFilesActivity<T extends FirebaseReference> extends AppCompatAct
         firebaseFolders = new ArrayList<>();
         mRecyclerViewAdapter = new FilesAdapter(firebaseReferences);
         rvFiles = findViewById(R.id.rvFiles);
-        txtViewLogin = findViewById((R.id.txtViewLogin));
+        txtViewReturn = findViewById((R.id.txtViewReturn));
         txtViewSortFiles = findViewById(R.id.txtViewSortFiles);
         txtViewChangeViewFiles = findViewById(R.id.txtViewChangeFilesView);
         layoutFileOptions = findViewById(R.id.layoutNoFilesFound);
@@ -118,28 +112,11 @@ public class ViewFilesActivity<T extends FirebaseReference> extends AppCompatAct
                 configureRecyclerView();
             }
         });
-    }
 
-    private void updateRegisterDependentElements(){
-        if(getFirebaseAuth().getCurrentUser() != null && getFirebaseAuth().getCurrentUser().isEmailVerified()) {
-            txtViewLogin.setText("Logout");
-            txtViewLogin.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    getFirebaseAuth().signOut();
-                    updateRegisterDependentElements();
-                }
-            });
-            return;
-        }
-
-        txtViewLogin.setText("Sign Up | Sign In");
-        txtViewLogin.setOnClickListener(new View.OnClickListener() {
+        txtViewReturn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Use custom form for registering
-                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivityForResult(intent, LOGIN_ACTIVITY_CODE);
+                finish();
             }
         });
     }
@@ -304,17 +281,6 @@ public class ViewFilesActivity<T extends FirebaseReference> extends AppCompatAct
         firebaseReferences.addAll((ArrayList<T>)firebaseFolders);
         firebaseReferences.addAll((ArrayList<T>)firebaseFiles);
         mRecyclerViewAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case LOGIN_ACTIVITY_CODE:
-                if (resultCode == RESULT_OK)
-                    updateRegisterDependentElements();
-                break;
-        }
     }
 
     @Override

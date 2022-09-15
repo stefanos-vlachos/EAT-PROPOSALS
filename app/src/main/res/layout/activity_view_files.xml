@@ -26,13 +26,13 @@
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/txtViewLogin"
+                android:id="@+id/txtViewReturn"
                 android:layout_alignParentEnd="true"
                 android:layout_marginEnd="20dp"
                 android:textColor="@color/cultured"
                 android:layout_centerVertical="true"
                 android:textSize="14sp"
-                android:text="Sign Up | Sign In"
+                android:text="Return Back"
         />
     </RelativeLayout>
 

@@ -2,6 +2,7 @@ package com.example.firebasegsocapp.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import org.jetbrains.annotations.NotNull;
 
 import static com.example.firebasegsocapp.activity.MainActivity.FIREBASE_FIRESTORE;
@@ -31,17 +33,19 @@ import static com.example.firebasegsocapp.activity.MainActivity.getFirebaseAuth;
 
 public class CreateAccountActivity extends AppCompatActivity {
 
-    FirebaseAuth firebaseAuth;
+    private FirebaseAuth firebaseAuth;
 
-    TextView txtViewCancelCreation;
-    TextInputEditText edtTextCreationUsername;
-    TextInputEditText edtTextCreationEmail;
-    TextInputEditText edtTextCreationPassword;
-    TextInputEditText edtTextConfirmedPassword;
-    TextView txtViewAccCreationShowPassword;
-    TextView txtViewShowConfirmedPassword;
-    Button buttonCreation;
-    TextView txtViewCreationAltMethod;
+    private TextView txtViewCancelCreation;
+    private TextInputEditText edtTextCreationUsername;
+    private TextInputEditText edtTextCreationEmail;
+    private TextInputEditText edtTextCreationPassword;
+    private TextInputEditText edtTextConfirmedPassword;
+    private TextView txtViewAccCreationShowPassword;
+    private TextView txtViewShowConfirmedPassword;
+    private Button buttonCreation;
+    private TextView txtViewCreationAltMethod;
+    private ProgressDialog progressDialog;
+
 
     private FirebaseAuth getAuth(){
         return firebaseAuth;
@@ -62,6 +66,7 @@ public class CreateAccountActivity extends AppCompatActivity {
     }
 
     private void init() {
+        progressDialog = new ProgressDialog(this);
         firebaseAuth = getFirebaseAuth();
         txtViewCancelCreation = findViewById(R.id.txtViewCancelCreation);
         edtTextCreationUsername = findViewById(R.id.edtTextAccCreationUsername);
@@ -115,16 +120,20 @@ public class CreateAccountActivity extends AppCompatActivity {
                 String email = edtTextCreationEmail.getText().toString();
                 String password = edtTextCreationPassword.getText().toString();
                 String confirmedPassword = edtTextConfirmedPassword.getText().toString();
-                if(checkUserInput(username, email, password, confirmedPassword))
+                if(checkUserInput(username, email, password, confirmedPassword)) {
+                    progressDialog.setMessage("Creating account ...");
+                    progressDialog.show();
                     createAccount(username, email, password);
+                }
             }
         });
 
         txtViewCreationAltMethod.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(intent);
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("message", "switch_login");
+                setResult(Activity.RESULT_OK, resultIntent);
                 finish();
             }
         });
@@ -163,17 +172,53 @@ public class CreateAccountActivity extends AppCompatActivity {
     }
 
     private void createAccount (String username, String email, String password) {
+        UserProfileChangeRequest.Builder builder = new UserProfileChangeRequest.Builder().setDisplayName(username);
+        UserProfileChangeRequest changeRequest = builder.build();
+
         firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(CreateAccountActivity.this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull @NotNull Task<AuthResult> task) {
                 if(task.isSuccessful()) {
-                    storePendingUser(email, username);
-                    sendEmailVerification();
+                    getAuth().getCurrentUser().updateProfile(changeRequest).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            storePendingUser(email, username);
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull @NotNull Exception e) {
+                            getAuth().getCurrentUser().delete();
+                            progressDialog.dismiss();
+                            Toast.makeText(CreateAccountActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
                 }
-                else
+                else {
+                    progressDialog.dismiss();
                     handleAccCreationErrors(task.getException().getLocalizedMessage());
+                }
             }
         });
+    }
+
+    private void storePendingUser(String userEmail, String userFullName){
+        FIREBASE_FIRESTORE.collection("pending_users").document(userEmail)
+                .set(new User("", userEmail, userFullName))
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        sendEmailVerification();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull @NotNull Exception e) {
+                        getAuth().getCurrentUser().delete();
+                        progressDialog.dismiss();
+                        Toast.makeText(CreateAccountActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void sendEmailVerification() {
@@ -192,9 +237,10 @@ public class CreateAccountActivity extends AppCompatActivity {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             getFirebaseAuth().signOut();
-                                            getFirebaseAuth().getCurrentUser().reload();
                                             Intent resultIntent = new Intent();
+                                            resultIntent.putExtra("message", "signup_complete");
                                             setResult(Activity.RESULT_OK, resultIntent);
+                                            progressDialog.dismiss();
                                             finish();
                                         }
                                     });
@@ -202,21 +248,13 @@ public class CreateAccountActivity extends AppCompatActivity {
                             alert.show();
                         }
                     }
-                });
-    }
-
-    private void storePendingUser(String userEmail, String userFullName){
-        FIREBASE_FIRESTORE.collection("pending_users").document(userEmail)
-                .set(new User("", userEmail, userFullName))
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                    }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull @NotNull Exception e) {
-                        Toast.makeText(CreateAccountActivity.this, "User Storage Failed", Toast.LENGTH_SHORT).show();
+                        getAuth().getCurrentUser().delete();
+                        progressDialog.dismiss();
+                        Toast.makeText(CreateAccountActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
