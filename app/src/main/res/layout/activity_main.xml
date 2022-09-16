@@ -81,7 +81,7 @@
         </com.smarteist.autoimageslider.SliderView>
 
         <TextView
-                android:text=""
+                android:text="Learn more about the app"
                 android:textSize="16sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

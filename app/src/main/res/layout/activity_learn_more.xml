@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+>
 
     <RelativeLayout
             android:orientation="horizontal"
@@ -17,16 +19,122 @@
                 android:id="@+id/textView3"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="20dp"
+                android:layout_marginStart="20dp"
                 android:textColor="@color/cultured"
                 android:textStyle="bold"
                 android:textSize="20sp"
         />
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtViewReturn"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="20dp"
+                android:textColor="@color/cultured"
+                android:layout_centerVertical="true"
+                android:textSize="14sp"
+                android:text="Return Back"
+        />
     </RelativeLayout>
-    <WebView
+    <!--<WebView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/header"
             android:id="@+id/webview"
-    />
-</RelativeLayout>
+    />-->
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical"
+    >
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:text="About EAT-PROPOSALS"
+                android:textSize="20sp"
+                android:layout_marginTop="25dp"
+        />
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:text="This app was developed in the context of Google Summer of Code 2022 and is a part of the Additional Testsuite research project by So.Da Lab. The developer team of the app comprises of Panagiotis Soritopoulos (Ph.D. Candidate in the Department of Informatics and Telecommunications) and Stefanos Vlachos (graduand student of the Department of Informatics and Telecommunications).\n\nThe team's goals will be to extend the functionality of the Additional Testsuite implementation to provide support for testing the latest version of JBoss Community Server, dynamically create/build multi-version Android projects which will be checked on the device, as well as the creation this app.\n\nUsing EAT-PROPOSALS, users can view proposals and Additional Testsuite-related function/program descriptions and upload their own as well, after creating a new account."
+                android:textSize="15sp"
+                android:textAlignment="viewStart"
+                android:layout_marginTop="20dp"
+                android:id="@+id/txtViewParagraphs"
+        />
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:text="Useful Links"
+                android:textStyle="bold"
+                android:layout_marginTop="25dp"
+        />
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="10dp"
+        >
+            <TextView
+                android:id="@+id/txtViewEAT"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="EAT on GitHub"
+                android:textColor="@color/oxford_blue"
+            />
+            <TextView
+                android:id="@+id/txtViewGSOC"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Full GSoC 2022 submission"
+                android:textColor="@color/oxford_blue"
+            />
+            <TextView
+                android:id="@+id/txtViewPanSot"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Panagiotis Sotiropoulos on GitHub"
+                android:textColor="@color/oxford_blue"
+            />
+            <TextView
+                android:id="@+id/txtViewSteVla"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Stefanos Vlachos on GitHub"
+                android:textColor="@color/oxford_blue"
+            />
+        </LinearLayout>
+
+        <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="35dp"
+                android:layout_gravity="center"
+        >
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Contact us: "
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+            />
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="support-eatproposals@gmail.com"
+                    android:textColor="@color/black"
+                    android:id="@+id/txtViewEmail"
+            />
+        </LinearLayout>
+
+    </LinearLayout>
+</LinearLayout>

@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         txtViewWelcome = findViewById(R.id.txtViewWelcome);
 
         txtViewLearnMore = findViewById(R.id.txtViewLearnMore);
-        SpannableString content = new SpannableString("Learn More");
+        SpannableString content = new SpannableString("Learn more about the app.");
         content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
         txtViewLearnMore.setText(content);
     }
