@@ -1,6 +1,7 @@
 package com.example.firebasegsocapp.activity;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -18,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import androidx.documentfile.provider.DocumentFile;
 import com.example.firebasegsocapp.R;
 import com.example.firebasegsocapp.adapter.SliderAdapter;
 import com.example.firebasegsocapp.domain.SliderData;
@@ -39,15 +41,31 @@ public class MainActivity extends AppCompatActivity {
     private final int UPLOAD_FILES_ACTIVITY_CODE = 1;
     private final int LOGIN_ACTIVITY_CODE = 2;
     private final int CREATE_ACCOUNT_ACTIVITY_CODE = 3;
+    private final int UPLOAD_FOLDER_ACTIVITY_CODE = 4;
 
     private final String[] MIME_TYPES = {
-            "application/pdf", "application/xml", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "application/vnd.ms-excel", "application/xhtml+xml", "text/plain", "application/rtf",
+            "application/pdf",
+            "text/xml",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.ms-excel",
+            "text/plain",
+            "text/rtf",
             "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-            "application/vnd.ms-powerpoint", "application/vnd.oasis.opendocument.text", "application/json",
-            "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "text/csv", "text/html", "application/x-tex", "image/jpeg", "image/png"
+            "application/vnd.ms-powerpoint",
+            "application/vnd.oasis.opendocument.text",
+            "application/json",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "text/comma-separated-values",
+            "text/html",
+            "text/x-tex",
+            "image/jpeg",
+            "image/png"
     };
+
+    private final String[] uploadOptions = new String[]{"a File/Files", "a Folder"};
+    private final int[] checkedOption = {-1};
+
     private static int filesToUpload;
     private static int uploadedFiles;
     private ProgressDialog progressDialog;
@@ -95,12 +113,20 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent;
                 if(getFirebaseAuth().getCurrentUser()!=null && getFirebaseAuth().getCurrentUser().isEmailVerified()){
-                    intent = new Intent();
-                    intent.setType("*/*");
-                    intent.putExtra(Intent.EXTRA_MIME_TYPES, MIME_TYPES);
-                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                    intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
-                    startActivityForResult(Intent.createChooser(intent, "Select Document"), UPLOAD_FILES_ACTIVITY_CODE);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("Upload:");
+                    builder.setIcon(R.mipmap.ic_launcher);
+                    builder.setSingleChoiceItems(uploadOptions, checkedOption[0], (dialog, which) -> {
+                        checkedOption[0] = which;
+                        handleUploadProcess(which);
+                        checkedOption[0]=-1;
+                        dialog.dismiss();
+                    });
+                    builder.setNegativeButton("Cancel", (dialog,which)->{
+                        checkedOption[0]=-1;
+                    });
+                    AlertDialog alertDialog = builder.create();
+                    alertDialog.show();
                     return;
                 }
 
@@ -124,6 +150,24 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    private void handleUploadProcess(int choice){
+        Intent intent = new Intent();
+        switch (choice) {
+            case 0:
+                intent.setType("*/*");
+                intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, MIME_TYPES);
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                startActivityForResult(Intent.createChooser(intent, "Select Files"), UPLOAD_FILES_ACTIVITY_CODE);
+                break;
+            case 1:
+                intent.setAction(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                intent.addCategory(Intent.CATEGORY_DEFAULT);
+                startActivityForResult(Intent.createChooser(intent, "Select a Folder"), UPLOAD_FOLDER_ACTIVITY_CODE);
+                break;
+        }
     }
 
     private void updateRegisterDependentElements(){
@@ -194,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
                         filesToUpload = data.getClipData().getItemCount();
                         for (int i = 0; i < filesToUpload; i++) {
                             Uri fileUri = data.getClipData().getItemAt(i).getUri();
-                            uploadFile(fileUri);
+                            uploadFile(fileUri, "pending-files");
                         }
                     }
                     //Handle single file
@@ -204,7 +248,34 @@ public class MainActivity extends AppCompatActivity {
 
                         filesToUpload = 1;
                         Uri fileUri = data.getData();
-                        uploadFile(fileUri);
+                        uploadFile(fileUri, "pending-files");
+                    }
+                }
+                break;
+            case UPLOAD_FOLDER_ACTIVITY_CODE:
+                if (resultCode == RESULT_OK) {
+                    if (data.getData() != null) {
+
+                        progressDialog.setMessage("Uploading folder ...");
+                        progressDialog.show();
+
+                        Uri treeUri = data.getData();
+                        String folderStrUri = treeUri.toString();
+                        String strToFind = "primary%3A";
+                        int cut = folderStrUri.lastIndexOf(strToFind);
+                        String folderName = folderStrUri.substring(cut+strToFind.length());
+
+                        DocumentFile pickedDir = DocumentFile.fromTreeUri(this, treeUri);
+                        filesToUpload = pickedDir.listFiles().length;
+                        if(filesToUpload==0){
+                            progressDialog.dismiss();
+                            Toast.makeText(this, "Upload Failed. Can not upload empty folder.", Toast.LENGTH_SHORT).show();
+                            break;
+                        }
+                        for(DocumentFile df: pickedDir.listFiles()){
+                            Uri fileUri = df.getUri();
+                            uploadFile(fileUri, "pending-files/"+folderName);
+                        }
                     }
                 }
                 break;
@@ -231,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void uploadFile(Uri fileUri){
+    private void uploadFile(Uri fileUri, String referenceName){
         uploadedFiles = 0;
         final String dialogTitle;
         final String dialogSuccessMessage;
@@ -248,7 +319,8 @@ public class MainActivity extends AppCompatActivity {
         HashMap<String, String> fileInfo = new HashMap<>(getFileInfo(fileUri));
         String fileName = fileInfo.get("fileName");
         String fileExtension = fileInfo.get("fileExtension");
-        StorageReference reference = getStorageReference().child("pending-files").child(fileName + fileExtension);
+        StorageReference reference = getStorageReference().child(referenceName).child(fileName+fileExtension);
+
         reference.putFile(fileUri)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
@@ -273,8 +345,10 @@ public class MainActivity extends AppCompatActivity {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        progressDialog.dismiss();
-                        Toast.makeText(MainActivity.this, dialogErrorMessage, Toast.LENGTH_SHORT).show();
+                        uploadedFiles++;
+                        if(uploadedFiles == filesToUpload)
+                            progressDialog.dismiss();
+                        Toast.makeText(MainActivity.this, fileName+fileExtension+": "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }

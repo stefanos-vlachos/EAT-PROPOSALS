@@ -55,21 +55,21 @@ public class FileViewRenderer extends ViewRenderer<FirebaseFile, FileViewHolder>
         fileExtensionsMimes.put(".doc", "application/msword");
         fileExtensionsMimes.put(".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
         fileExtensionsMimes.put(".pdf", "application/pdf");
-        fileExtensionsMimes.put(".xml", "application/xml");
+        fileExtensionsMimes.put(".xml", "text/xml");
         fileExtensionsMimes.put(".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         fileExtensionsMimes.put(".xls", "application/vnd.ms-excel");
         fileExtensionsMimes.put(".txt", "text/plain");
-        fileExtensionsMimes.put(".rtf", "application/rtf");
+        fileExtensionsMimes.put(".rtf", "text/rtf");
         fileExtensionsMimes.put(".ppt", "application/vnd.ms-powerpoint");
         fileExtensionsMimes.put(".pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation");
         fileExtensionsMimes.put(".odt", "application/vnd.oasis.opendocument.text");
         fileExtensionsMimes.put(".json", "application/json");
-        fileExtensionsMimes.put(".csv", "text/csv");
+        fileExtensionsMimes.put(".csv", "text/comma-separated-values");
         fileExtensionsMimes.put(".html", "text/html");
         fileExtensionsMimes.put(".jpeg", "image/jpeg");
         fileExtensionsMimes.put(".jpg", "image/jpeg");
         fileExtensionsMimes.put(".png", "image/png");
-        fileExtensionsMimes.put(".tex", "application/x-tex");
+        fileExtensionsMimes.put(".tex", "text/x-tex");
     }
 
 

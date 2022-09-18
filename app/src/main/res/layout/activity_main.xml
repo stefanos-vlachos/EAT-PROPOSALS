@@ -105,14 +105,13 @@
         <GridLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="bottom"
                 android:rowCount="1"
                 android:columnCount="2"
                 android:useDefaultMargins="true"
         >
             <Button
-                    android:text="View files"
-                    android:layout_width="90dp"
+                    android:text="View Files"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/btnViewFiles"
                     android:layout_column="0"
@@ -120,10 +119,11 @@
                     android:textAllCaps="false"
                     android:textColor="@color/eerie_black"
                     android:backgroundTint="@color/cultured"
+                    android:layout_gravity="center_vertical"
             />
             <Button
-                    android:text="Upload file"
-                    android:layout_width="90dp"
+                    android:text="Upload"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/btnUploadFile"
                     android:layout_column="1"
@@ -131,6 +131,7 @@
                     android:textColor="@color/eerie_black"
                     android:backgroundTint="@color/cultured"
                     android:textAllCaps="false"
+                    android:layout_gravity="center_vertical"
             />
         </GridLayout>
     </LinearLayout>
