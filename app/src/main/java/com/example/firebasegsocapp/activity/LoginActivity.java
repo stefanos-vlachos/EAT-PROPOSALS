@@ -40,6 +40,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextView txtViewCancelLogin;
     private TextView txtViewLoginTitle;
     private TextView txtViewLoginShowPassword;
+    private TextView txtViewForgotPassword;
     private FirebaseAuth firebaseAuth;
     private ProgressDialog progressDialog;
 
@@ -65,6 +66,7 @@ public class LoginActivity extends AppCompatActivity {
         edtTextLoginEmail = findViewById(R.id.edtTextLoginEmail);
         edtTextLoginPassword = findViewById(R.id.edtTextLoginPassword);
         txtViewLoginShowPassword = findViewById(R.id.txtViewLoginShowPassword);
+        txtViewForgotPassword = findViewById(R.id.textViewForgotPassword);
         buttonLogin = findViewById(R.id.buttonLogin);
         txtViewLoginAltMethod = findViewById(R.id.txtViewLoginAltMethod);
     }
@@ -112,6 +114,14 @@ public class LoginActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        txtViewForgotPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), ResetPasswordActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private boolean checkUserInput (String email, String password) {
@@ -157,6 +167,34 @@ public class LoginActivity extends AppCompatActivity {
                                                 setResult(Activity.RESULT_OK, resultIntent);
                                                 progressDialog.dismiss();
                                                 finish();
+                                            }
+                                        })
+                                        .setNegativeButton("Send E-mail again", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                FirebaseUser user = firebaseAuth.getCurrentUser();
+                                                user.sendEmailVerification()
+                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull @NotNull Task<Void> task) {
+                                                                if (task.isSuccessful()) {
+                                                                    progressDialog.dismiss();
+                                                                    getFirebaseAuth().signOut();
+                                                                    Intent resultIntent = new Intent();
+                                                                    resultIntent.putExtra("message", "login_complete");
+                                                                    setResult(Activity.RESULT_OK, resultIntent);
+
+                                                                    finish();
+                                                                }
+                                                            }
+                                                        })
+                                                        .addOnFailureListener(new OnFailureListener() {
+                                                            @Override
+                                                            public void onFailure(@NonNull @NotNull Exception e) {
+                                                                progressDialog.dismiss();
+                                                                Toast.makeText(LoginActivity.this, "Process failed. Try again.", Toast.LENGTH_SHORT).show();
+                                                            }
+                                                        });
                                             }
                                         });
                                 AlertDialog alert = builder.create();

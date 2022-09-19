@@ -19,6 +19,16 @@
     >
 
         <activity
+                android:name=".activity.ResetPasswordActivity"
+                android:parentActivityName=".activity.MainActivity"
+                android:exported="true"
+                android:screenOrientation="portrait"
+        >
+            <meta-data
+                    android:name="android:support:PARENT_ACTIVITY"
+                    android:value=".MainActivity" />
+        </activity>
+        <activity
                 android:name=".activity.LearnMoreActivity"
                 android:parentActivityName=".activity.MainActivity"
                 android:exported="true"
