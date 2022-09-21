@@ -11,12 +11,14 @@ public class FolderViewHolder extends RecyclerView.ViewHolder{
 
     public CardView cardView;
     public TextView nameTextView;
+    public TextView downloadView;
 
     public FolderViewHolder(View itemView) {
         super(itemView);
 
         nameTextView = itemView.findViewById(R.id.txtName);
         cardView = itemView.findViewById(R.id.cardView);
+        downloadView = itemView.findViewById(R.id.txtViewDownloadFolder);
 
     }
 }
