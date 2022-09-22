@@ -22,34 +22,31 @@ import androidx.documentfile.provider.DocumentFile;
 import com.example.firebasegsocapp.R;
 import com.example.firebasegsocapp.adapter.SliderAdapter;
 import com.example.firebasegsocapp.domain.SliderData;
+import com.example.firebasegsocapp.service.FirebaseFilesService;
 import com.google.android.gms.tasks.*;
 import com.google.firebase.auth.*;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.*;
 import com.smarteist.autoimageslider.SliderView;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     public static FirebaseAuth FIREBASE_AUTH = FirebaseAuth.getInstance();
     public static FirebaseFirestore FIREBASE_FIRESTORE = FirebaseFirestore.getInstance();
     public static StorageReference STORAGE_REFERENCE = FirebaseStorage.getInstance().getReference();
+    private FirebaseFilesService FIREBASE_FILES_SERVICE;
 
     private final int UPLOAD_FILES_ACTIVITY_CODE = 1;
     private final int LOGIN_ACTIVITY_CODE = 2;
     private final int CREATE_ACCOUNT_ACTIVITY_CODE = 3;
     private final int UPLOAD_FOLDER_ACTIVITY_CODE = 4;
 
+    private String[] acceptedMimeTypes;
     private final String[] uploadOptions = new String[]{"a File/Files", "a Folder"};
     private final int[] checkedOption = {-1};
-
-    private String[] acceptedMimeTypes;
 
     private static int filesToUpload;
     private static int uploadedFiles;
@@ -75,12 +72,14 @@ public class MainActivity extends AppCompatActivity {
 
         init();
         setListeners();
-        loadAcceptedMimeTypes();
         updateRegisterDependentElements();
         configureSlideshow();
     }
 
     private void init() {
+        FIREBASE_FILES_SERVICE = new FirebaseFilesService(this);
+        acceptedMimeTypes = FIREBASE_FILES_SERVICE.loadAcceptedMimeTypesAndResources();
+
         progressDialog = new ProgressDialog(this);
         txtViewLogin = findViewById(R.id.txtViewLogin);
         btnUploadFile = findViewById(R.id.btnUploadFile);
@@ -134,23 +133,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), LearnMoreActivity.class);
                 startActivity(intent);
-            }
-        });
-    }
-
-    private void loadAcceptedMimeTypes(){
-        FIREBASE_FIRESTORE.collection("accepted_file_types").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull @NotNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    List<String> mimeTypes = new ArrayList<>();
-                    for(DocumentSnapshot ds: task.getResult()){
-                        String fileMimeType = ds.getString("mime_type");
-                        mimeTypes.add(fileMimeType);
-                    }
-                    acceptedMimeTypes = new String[mimeTypes.size()];
-                    mimeTypes.toArray(acceptedMimeTypes);
-                }
             }
         });
     }
@@ -391,7 +373,6 @@ public class MainActivity extends AppCompatActivity {
                 fileInfo.put("fileExtension", "");
             }
         }
-
         return fileInfo;
     }
 

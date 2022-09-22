@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import com.example.firebasegsocapp.R;
 import com.example.firebasegsocapp.domain.FirebaseFile;
+import com.example.firebasegsocapp.service.FirebaseFilesService;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -37,55 +39,14 @@ import static android.os.Environment.DIRECTORY_DOWNLOADS;
 
 public class FileViewRenderer extends ViewRenderer<FirebaseFile, FileViewHolder> {
 
-    private static HashMap<String, Integer> fileExtensionImages;
-    static {
-        fileExtensionImages = new HashMap<>();
-        fileExtensionImages.put(".doc", R.drawable.word_icon);
-        fileExtensionImages.put(".docx", R.drawable.word_icon);
-        fileExtensionImages.put(".pdf", R.drawable.pdf_icon);
-        fileExtensionImages.put(".xml", R.drawable.xml_icon);
-        fileExtensionImages.put(".xlsx", R.drawable.xls_icon);
-        fileExtensionImages.put(".xls", R.drawable.xls_icon);
-        fileExtensionImages.put(".txt", R.drawable.txt_icon);
-        fileExtensionImages.put(".rtf", R.drawable.document_icon);
-        fileExtensionImages.put(".ppt", R.drawable.ppt_icon);
-        fileExtensionImages.put(".pptx", R.drawable.ppt_icon);
-        fileExtensionImages.put(".odt", R.drawable.document_icon);
-        fileExtensionImages.put(".json", R.drawable.json_icon);
-        fileExtensionImages.put(".csv", R.drawable.csv_icon);
-        fileExtensionImages.put(".html", R.drawable.html_icon);
-        fileExtensionImages.put(".jpeg", R.drawable.image_icon);
-        fileExtensionImages.put(".jpg", R.drawable.image_icon);
-        fileExtensionImages.put(".png", R.drawable.image_icon);
-        fileExtensionImages.put(".tex", R.drawable.document_icon);
-    }
-
+    private final FirebaseFilesService FIREBASE_FILES_SERVICE = new FirebaseFilesService();
+    private static HashMap<String, Bitmap> fileExtensionImages;
     private static HashMap<String, String> fileExtensionsMimes;
-    static {
-        fileExtensionsMimes = new HashMap<>();
-        fileExtensionsMimes.put(".doc", "application/msword");
-        fileExtensionsMimes.put(".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-        fileExtensionsMimes.put(".pdf", "application/pdf");
-        fileExtensionsMimes.put(".xml", "text/xml");
-        fileExtensionsMimes.put(".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        fileExtensionsMimes.put(".xls", "application/vnd.ms-excel");
-        fileExtensionsMimes.put(".txt", "text/plain");
-        fileExtensionsMimes.put(".rtf", "text/rtf");
-        fileExtensionsMimes.put(".ppt", "application/vnd.ms-powerpoint");
-        fileExtensionsMimes.put(".pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation");
-        fileExtensionsMimes.put(".odt", "application/vnd.oasis.opendocument.text");
-        fileExtensionsMimes.put(".json", "application/json");
-        fileExtensionsMimes.put(".csv", "text/comma-separated-values");
-        fileExtensionsMimes.put(".html", "text/html");
-        fileExtensionsMimes.put(".jpeg", "image/jpeg");
-        fileExtensionsMimes.put(".jpg", "image/jpeg");
-        fileExtensionsMimes.put(".png", "image/png");
-        fileExtensionsMimes.put(".tex", "text/x-tex");
-    }
-
 
     public FileViewRenderer(final int type, final Context context) {
         super(type, context);
+        fileExtensionImages = new HashMap<String, Bitmap>(FIREBASE_FILES_SERVICE.getFileExtensionsImages());
+        fileExtensionsMimes = new HashMap<String, String>(FIREBASE_FILES_SERVICE.getFileExtensionsMimes());
     }
 
     @Override public
@@ -191,6 +152,6 @@ public class FileViewRenderer extends ViewRenderer<FirebaseFile, FileViewHolder>
             imageView.setImageResource(R.drawable.document_icon);
             return;
         }
-        imageView.setImageResource(fileExtensionImages.get(fileType));
+        imageView.setImageBitmap(fileExtensionImages.get(fileType));
     }
 }

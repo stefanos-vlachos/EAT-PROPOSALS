@@ -123,6 +123,7 @@ public class FolderViewRenderer extends ViewRenderer<FirebaseFolder, FolderViewH
                     progressDialog.dismiss();
                 } else {
                     for (StorageReference fileRef : listResult.getItems()) {
+                        Toast.makeText(context, fileRef.getName(), Toast.LENGTH_SHORT).show();
                         File localFile = new File(newFolderDir, fileRef.getName());
 
                         fileRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
