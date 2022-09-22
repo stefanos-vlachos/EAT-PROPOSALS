@@ -1,7 +1,6 @@
 package com.example.firebasegsocapp.activity;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -25,12 +24,16 @@ import com.example.firebasegsocapp.adapter.SliderAdapter;
 import com.example.firebasegsocapp.domain.SliderData;
 import com.google.android.gms.tasks.*;
 import com.google.firebase.auth.*;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.*;
 import com.smarteist.autoimageslider.SliderView;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,28 +46,10 @@ public class MainActivity extends AppCompatActivity {
     private final int CREATE_ACCOUNT_ACTIVITY_CODE = 3;
     private final int UPLOAD_FOLDER_ACTIVITY_CODE = 4;
 
-    private final String[] MIME_TYPES = {
-            "application/pdf",
-            "text/xml",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "application/vnd.ms-excel",
-            "text/plain",
-            "text/rtf",
-            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-            "application/vnd.ms-powerpoint",
-            "application/vnd.oasis.opendocument.text",
-            "application/json",
-            "application/msword",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "text/comma-separated-values",
-            "text/html",
-            "text/x-tex",
-            "image/jpeg",
-            "image/png"
-    };
-
     private final String[] uploadOptions = new String[]{"a File/Files", "a Folder"};
     private final int[] checkedOption = {-1};
+
+    private String[] acceptedMimeTypes;
 
     private static int filesToUpload;
     private static int uploadedFiles;
@@ -90,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
 
         init();
         setListeners();
+        loadAcceptedMimeTypes();
         updateRegisterDependentElements();
         configureSlideshow();
     }
@@ -152,13 +138,30 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void loadAcceptedMimeTypes(){
+        FIREBASE_FIRESTORE.collection("accepted_file_types").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull @NotNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    List<String> mimeTypes = new ArrayList<>();
+                    for(DocumentSnapshot ds: task.getResult()){
+                        String fileMimeType = ds.getString("mime_type");
+                        mimeTypes.add(fileMimeType);
+                    }
+                    acceptedMimeTypes = new String[mimeTypes.size()];
+                    mimeTypes.toArray(acceptedMimeTypes);
+                }
+            }
+        });
+    }
+
     private void handleUploadProcess(int choice){
         Intent intent = new Intent();
         switch (choice) {
             case 0:
                 intent.setType("*/*");
                 intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
-                intent.putExtra(Intent.EXTRA_MIME_TYPES, MIME_TYPES);
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, acceptedMimeTypes);
                 intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                 startActivityForResult(Intent.createChooser(intent, "Select Files"), UPLOAD_FILES_ACTIVITY_CODE);
                 break;

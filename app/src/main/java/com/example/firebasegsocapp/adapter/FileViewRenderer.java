@@ -6,21 +6,32 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import com.example.firebasegsocapp.R;
 import com.example.firebasegsocapp.domain.FirebaseFile;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
 
@@ -176,6 +187,10 @@ public class FileViewRenderer extends ViewRenderer<FirebaseFile, FileViewHolder>
     }
 
     private void setImageForFileExtension(ImageView imageView, String fileType) {
+        if(fileExtensionImages.get(fileType)==null) {
+            imageView.setImageResource(R.drawable.document_icon);
+            return;
+        }
         imageView.setImageResource(fileExtensionImages.get(fileType));
     }
 }
