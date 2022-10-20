@@ -240,7 +240,6 @@ public class MainActivity extends AppCompatActivity {
             case UPLOAD_FOLDER_ACTIVITY_CODE:
                 if (resultCode == RESULT_OK) {
                     if (data.getData() != null) {
-
                         progressDialog.setMessage("Uploading folder ...");
                         progressDialog.show();
 
@@ -291,15 +290,12 @@ public class MainActivity extends AppCompatActivity {
         uploadedFiles = 0;
         final String dialogTitle;
         final String dialogSuccessMessage;
-        final String dialogErrorMessage;
         if(filesToUpload > 1){
             dialogTitle = "Files Uploaded";
             dialogSuccessMessage = "Your files are undergoing a review process.\nOnce they are approved, they will be available on the app.";
-            dialogErrorMessage = "Files upload failed. Try again.";
         } else{
             dialogTitle = "File Uploaded";
             dialogSuccessMessage = "Your file is undergoing a review process.\nOnce it is approved, it will be available on the app.";
-            dialogErrorMessage = "File upload failed. Try again.";
         }
         HashMap<String, String> fileInfo = new HashMap<>(getFileInfo(fileUri));
         String fileName = fileInfo.get("fileName");
