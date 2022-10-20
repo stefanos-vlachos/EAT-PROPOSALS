@@ -56,6 +56,17 @@
                           android:freezesText="true"
                 />
             </LinearLayout>
+            <TextView
+                    android:id="@+id/txtViewDownloadFolder"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/blue_pantone"
+                    android:text="Download"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:textSize="14sp"
+                    android:layout_marginEnd="9dp"
+            />
 
         </RelativeLayout>
     </RelativeLayout>

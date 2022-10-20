@@ -1,7 +1,6 @@
 package com.example.firebasegsocapp.activity;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -23,46 +22,29 @@ import androidx.documentfile.provider.DocumentFile;
 import com.example.firebasegsocapp.R;
 import com.example.firebasegsocapp.adapter.SliderAdapter;
 import com.example.firebasegsocapp.domain.SliderData;
+import com.example.firebasegsocapp.service.FirebaseFilesService;
 import com.google.android.gms.tasks.*;
 import com.google.firebase.auth.*;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.*;
 import com.smarteist.autoimageslider.SliderView;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-
 
 public class MainActivity extends AppCompatActivity {
 
     public static FirebaseAuth FIREBASE_AUTH = FirebaseAuth.getInstance();
     public static FirebaseFirestore FIREBASE_FIRESTORE = FirebaseFirestore.getInstance();
     public static StorageReference STORAGE_REFERENCE = FirebaseStorage.getInstance().getReference();
+    private FirebaseFilesService FIREBASE_FILES_SERVICE;
 
     private final int UPLOAD_FILES_ACTIVITY_CODE = 1;
     private final int LOGIN_ACTIVITY_CODE = 2;
     private final int CREATE_ACCOUNT_ACTIVITY_CODE = 3;
     private final int UPLOAD_FOLDER_ACTIVITY_CODE = 4;
 
-    private final String[] MIME_TYPES = {
-            "application/pdf",
-            "text/xml",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "application/vnd.ms-excel",
-            "text/plain",
-            "text/rtf",
-            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-            "application/vnd.ms-powerpoint",
-            "application/vnd.oasis.opendocument.text",
-            "application/json",
-            "application/msword",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "text/comma-separated-values",
-            "text/html",
-            "text/x-tex",
-            "image/jpeg",
-            "image/png"
-    };
-
+    private String[] acceptedMimeTypes;
     private final String[] uploadOptions = new String[]{"a File/Files", "a Folder"};
     private final int[] checkedOption = {-1};
 
@@ -95,6 +77,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init() {
+        FIREBASE_FILES_SERVICE = new FirebaseFilesService(this);
+        acceptedMimeTypes = FIREBASE_FILES_SERVICE.loadAcceptedMimeTypesAndResources();
+
         progressDialog = new ProgressDialog(this);
         txtViewLogin = findViewById(R.id.txtViewLogin);
         btnUploadFile = findViewById(R.id.btnUploadFile);
@@ -158,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
             case 0:
                 intent.setType("*/*");
                 intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
-                intent.putExtra(Intent.EXTRA_MIME_TYPES, MIME_TYPES);
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, acceptedMimeTypes);
                 intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                 startActivityForResult(Intent.createChooser(intent, "Select Files"), UPLOAD_FILES_ACTIVITY_CODE);
                 break;
@@ -255,7 +240,6 @@ public class MainActivity extends AppCompatActivity {
             case UPLOAD_FOLDER_ACTIVITY_CODE:
                 if (resultCode == RESULT_OK) {
                     if (data.getData() != null) {
-
                         progressDialog.setMessage("Uploading folder ...");
                         progressDialog.show();
 
@@ -306,15 +290,12 @@ public class MainActivity extends AppCompatActivity {
         uploadedFiles = 0;
         final String dialogTitle;
         final String dialogSuccessMessage;
-        final String dialogErrorMessage;
         if(filesToUpload > 1){
             dialogTitle = "Files Uploaded";
             dialogSuccessMessage = "Your files are undergoing a review process.\nOnce they are approved, they will be available on the app.";
-            dialogErrorMessage = "Files upload failed. Try again.";
         } else{
             dialogTitle = "File Uploaded";
             dialogSuccessMessage = "Your file is undergoing a review process.\nOnce it is approved, it will be available on the app.";
-            dialogErrorMessage = "File upload failed. Try again.";
         }
         HashMap<String, String> fileInfo = new HashMap<>(getFileInfo(fileUri));
         String fileName = fileInfo.get("fileName");
@@ -388,7 +369,6 @@ public class MainActivity extends AppCompatActivity {
                 fileInfo.put("fileExtension", "");
             }
         }
-
         return fileInfo;
     }
 

@@ -60,7 +60,7 @@ public class LearnMoreActivity extends AppCompatActivity {
         content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
         txtViewSteVla.setText(content);
 
-        content = new SpannableString("support-eatproposals@gmail.com");
+        content = new SpannableString("eat.testsuite@gmail.com");
         content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
         txtViewEmail.setText(content);
 
@@ -113,7 +113,7 @@ public class LearnMoreActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent email= new Intent(Intent.ACTION_SENDTO);
-                email.setData(Uri.parse("mailto:stevenvlaxos@gmail.com"));
+                email.setData(Uri.parse("mailto:eat.testsuite@gmail.com"));
                 email.putExtra(Intent.EXTRA_SUBJECT, "Subject");
                 email.putExtra(Intent.EXTRA_TEXT, "My Email message");
                 startActivity(email);
