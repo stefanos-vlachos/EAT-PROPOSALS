@@ -3,6 +3,10 @@ plugins {
     id 'com.google.gms.google-services'
 }
 
+def apikeyPropertiesFile = file('apikey.properties')
+Properties apikeyProperties = new Properties()
+apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
+
 android {
     compileSdkVersion 32
     buildToolsVersion "32.0.0"
@@ -14,6 +18,12 @@ android {
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
+
+        buildConfigField "String", 'MAILGUN_BASE_URL', apikeyProperties['MAILGUN_BASE_URL']
+        buildConfigField "String", 'MAILGUN_API_USERNAME', apikeyProperties['MAILGUN_API_USERNAME']
+        buildConfigField "String", 'MAILGUN_API_PASSWORD', apikeyProperties['MAILGUN_API_PASSWORD']
+        buildConfigField "String", 'MAILGUN_SEND_FROM', apikeyProperties['MAILGUN_SEND_FROM']
+        buildConfigField "String", 'MAILGUN_SEND_TO', apikeyProperties['MAILGUN_SEND_TO']
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -32,6 +42,10 @@ android {
 }
 
 dependencies {
+    def retrofit_version = '2.4.0'
+
+    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
 
     implementation platform('com.google.firebase:firebase-bom:30.3.2')
 
@@ -40,6 +54,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-database'
     implementation 'com.google.firebase:firebase-firestore'
+
 
     implementation 'com.github.smarteist:autoimageslider:1.3.9'
 

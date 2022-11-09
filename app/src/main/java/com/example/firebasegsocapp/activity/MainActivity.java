@@ -22,13 +22,13 @@ import androidx.documentfile.provider.DocumentFile;
 import com.example.firebasegsocapp.R;
 import com.example.firebasegsocapp.adapter.SliderAdapter;
 import com.example.firebasegsocapp.domain.SliderData;
+import com.example.firebasegsocapp.service.EmailService;
 import com.example.firebasegsocapp.service.FirebaseFilesService;
 import com.google.android.gms.tasks.*;
 import com.google.firebase.auth.*;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.*;
 import com.smarteist.autoimageslider.SliderView;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -37,7 +37,9 @@ public class MainActivity extends AppCompatActivity {
     public static FirebaseAuth FIREBASE_AUTH = FirebaseAuth.getInstance();
     public static FirebaseFirestore FIREBASE_FIRESTORE = FirebaseFirestore.getInstance();
     public static StorageReference STORAGE_REFERENCE = FirebaseStorage.getInstance().getReference();
+
     private FirebaseFilesService FIREBASE_FILES_SERVICE;
+    private EmailService EMAIL_SERVICE;
 
     private final int UPLOAD_FILES_ACTIVITY_CODE = 1;
     private final int LOGIN_ACTIVITY_CODE = 2;
@@ -78,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void init() {
         FIREBASE_FILES_SERVICE = new FirebaseFilesService(this);
+        EMAIL_SERVICE = EmailService.getInstance();
+
         acceptedMimeTypes = FIREBASE_FILES_SERVICE.loadAcceptedMimeTypesAndResources();
 
         progressDialog = new ProgressDialog(this);
@@ -217,6 +221,7 @@ public class MainActivity extends AppCompatActivity {
                 if (resultCode == RESULT_OK) {
                     //Handle multiple files
                     if (data.getClipData() != null) {
+                        EMAIL_SERVICE.initEmail(1, FIREBASE_AUTH.getCurrentUser().getEmail());
                         progressDialog.setMessage("Uploading files ...");
                         progressDialog.show();
 
@@ -228,6 +233,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     //Handle single file
                     else if (data.getData() != null) {
+                        EMAIL_SERVICE.initEmail(0, FIREBASE_AUTH.getCurrentUser().getEmail());
                         progressDialog.setMessage("Uploading file ...");
                         progressDialog.show();
 
@@ -240,6 +246,7 @@ public class MainActivity extends AppCompatActivity {
             case UPLOAD_FOLDER_ACTIVITY_CODE:
                 if (resultCode == RESULT_OK) {
                     if (data.getData() != null) {
+                        EMAIL_SERVICE.initEmail(2, FIREBASE_AUTH.getCurrentUser().getEmail());
                         progressDialog.setMessage("Uploading folder ...");
                         progressDialog.show();
 
@@ -306,8 +313,10 @@ public class MainActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        EMAIL_SERVICE.addFileToEmailBody(fileName, fileExtension, reference.getPath());
                         uploadedFiles++;
                         if(uploadedFiles == filesToUpload){
+                            EMAIL_SERVICE.sendEmail();
                             progressDialog.dismiss();
                             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                             builder.setTitle(dialogTitle)
