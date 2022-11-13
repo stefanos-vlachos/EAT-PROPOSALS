@@ -60,6 +60,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-database'
     implementation 'com.google.firebase:firebase-firestore'
 
+    implementation 'androidx.documentfile:documentfile:1.0.1'
 
     implementation 'com.github.smarteist:autoimageslider:1.3.9'
 

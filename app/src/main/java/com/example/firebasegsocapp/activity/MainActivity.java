@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.provider.DocumentsContract;
 import android.provider.OpenableColumns;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
@@ -29,8 +30,12 @@ import com.google.firebase.auth.*;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.*;
 import com.smarteist.autoimageslider.SliderView;
+
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -47,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private final int UPLOAD_FOLDER_ACTIVITY_CODE = 4;
 
     private String[] acceptedMimeTypes;
-    private final String[] uploadOptions = new String[]{"a File/Files", "a Folder"};
+    private final String[] uploadOptions = new String[]{"a File", "a Folder"};
     private final int[] checkedOption = {-1};
 
     private static int filesToUpload;
@@ -146,10 +151,10 @@ public class MainActivity extends AppCompatActivity {
         switch (choice) {
             case 0:
                 intent.setType("*/*");
-                intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
                 intent.putExtra(Intent.EXTRA_MIME_TYPES, acceptedMimeTypes);
-                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                startActivityForResult(Intent.createChooser(intent, "Select Files"), UPLOAD_FILES_ACTIVITY_CODE);
+                //intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+                startActivityForResult(Intent.createChooser(intent, "Select a File"), UPLOAD_FILES_ACTIVITY_CODE);
                 break;
             case 1:
                 intent.setAction(Intent.ACTION_OPEN_DOCUMENT_TREE);
@@ -220,9 +225,11 @@ public class MainActivity extends AppCompatActivity {
             case UPLOAD_FILES_ACTIVITY_CODE:
                 if (resultCode == RESULT_OK) {
                     //Handle multiple files
-                    if (data.getClipData() != null) {
+                    /*if (data.getClipData() != null) {
+                        Toast.makeText(this, "MULTIPLE", Toast.LENGTH_SHORT).show();
                         EMAIL_SERVICE.initEmail(1, FIREBASE_AUTH.getCurrentUser().getEmail());
                         progressDialog.setMessage("Uploading files ...");
+                        progressDialog.setCancelable(false);
                         progressDialog.show();
 
                         filesToUpload = data.getClipData().getItemCount();
@@ -230,14 +237,18 @@ public class MainActivity extends AppCompatActivity {
                             Uri fileUri = data.getClipData().getItemAt(i).getUri();
                             uploadFile(fileUri, "pending-files");
                         }
-                    }
+                    }*/
                     //Handle single file
-                    else if (data.getData() != null) {
+                    if (data.getData() != null) {
                         EMAIL_SERVICE.initEmail(0, FIREBASE_AUTH.getCurrentUser().getEmail());
+
                         progressDialog.setMessage("Uploading file ...");
+                        progressDialog.setCancelable(false);
                         progressDialog.show();
 
+                        uploadedFiles = 0;
                         filesToUpload = 1;
+
                         Uri fileUri = data.getData();
                         uploadFile(fileUri, "pending-files");
                     }
@@ -247,26 +258,15 @@ public class MainActivity extends AppCompatActivity {
                 if (resultCode == RESULT_OK) {
                     if (data.getData() != null) {
                         EMAIL_SERVICE.initEmail(2, FIREBASE_AUTH.getCurrentUser().getEmail());
+
                         progressDialog.setMessage("Uploading folder ...");
+                        progressDialog.setCancelable(false);
                         progressDialog.show();
 
-                        Uri treeUri = data.getData();
-                        String folderStrUri = treeUri.toString();
-                        String strToFind = "primary%3A";
-                        int cut = folderStrUri.lastIndexOf(strToFind);
-                        String folderName = folderStrUri.substring(cut+strToFind.length());
+                        uploadedFiles = 0;
+                        filesToUpload = 0;
 
-                        DocumentFile pickedDir = DocumentFile.fromTreeUri(this, treeUri);
-                        filesToUpload = pickedDir.listFiles().length;
-                        if(filesToUpload==0){
-                            progressDialog.dismiss();
-                            Toast.makeText(this, "Upload Failed. Can not upload empty folder.", Toast.LENGTH_SHORT).show();
-                            break;
-                        }
-                        for(DocumentFile df: pickedDir.listFiles()){
-                            Uri fileUri = df.getUri();
-                            uploadFile(fileUri, "pending-files/"+folderName);
-                        }
+                        uploadFolder(data.getData(), "pending-files/");
                     }
                 }
                 break;
@@ -293,10 +293,30 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void uploadFolder(@Nullable Uri treeUri, String rootFolderPath){
+        //Find the path of the uploaded folder
+        String folderStrUri = treeUri.toString();
+        String folderPath = rootFolderPath + folderStrUri.substring(folderStrUri.lastIndexOf("%2F")+3).replace("%2F", "/") + "/";
+        rootFolderPath = folderPath;
+
+        DocumentFile pickedDir = DocumentFile.fromTreeUri(this, treeUri);
+
+        for(DocumentFile df: pickedDir.listFiles()){
+            //Check if folder contains nested folders
+            if(df.isDirectory())
+                uploadFolder(df.getUri(), rootFolderPath);
+            else if (df.isFile()){
+                filesToUpload++;
+                uploadFile(df.getUri(), rootFolderPath);
+            }
+        }
+    }
+
     private void uploadFile(Uri fileUri, String referenceName){
-        uploadedFiles = 0;
         final String dialogTitle;
         final String dialogSuccessMessage;
+
+        //Prepare dialog box
         if(filesToUpload > 1){
             dialogTitle = "Files Uploaded";
             dialogSuccessMessage = "Your files are undergoing a review process.\nOnce they are approved, they will be available on the app.";
@@ -304,19 +324,24 @@ public class MainActivity extends AppCompatActivity {
             dialogTitle = "File Uploaded";
             dialogSuccessMessage = "Your file is undergoing a review process.\nOnce it is approved, it will be available on the app.";
         }
+
+        //Get file info
         HashMap<String, String> fileInfo = new HashMap<>(getFileInfo(fileUri));
         String fileName = fileInfo.get("fileName");
         String fileExtension = fileInfo.get("fileExtension");
-        StorageReference reference = getStorageReference().child(referenceName).child(fileName+fileExtension);
 
+        //Upload file
+        StorageReference reference = getStorageReference().child(referenceName).child(fileName+fileExtension);
         reference.putFile(fileUri)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         EMAIL_SERVICE.addFileToEmailBody(fileName, fileExtension, reference.getPath());
+
                         uploadedFiles++;
                         if(uploadedFiles == filesToUpload){
                             EMAIL_SERVICE.sendEmail();
+
                             progressDialog.dismiss();
                             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                             builder.setTitle(dialogTitle)
@@ -343,7 +368,7 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    //method to compose the name of the uploaded files
+    //Method to extract the file info from a uri
     @SuppressLint("Range")
     private HashMap<String,String> getFileInfo(Uri fileUri) {
         HashMap<String,String> fileInfo = new HashMap<>();

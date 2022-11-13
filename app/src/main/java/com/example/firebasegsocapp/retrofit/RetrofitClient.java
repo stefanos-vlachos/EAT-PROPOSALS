@@ -4,6 +4,7 @@ import android.util.Base64;
 
 import java.io.IOException;
 
+import android.util.Log;
 import com.example.firebasegsocapp.BuildConfig;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
