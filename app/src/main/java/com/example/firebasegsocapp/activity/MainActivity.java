@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser user = getFirebaseAuth().getCurrentUser();
 
         if(user != null && user.isEmailVerified()) {
-            txtViewWelcome.setText("Welcome back " + FIREBASE_AUTH.getCurrentUser().getDisplayName() + ".");
+            txtViewWelcome.setText("Welcome back\n" + FIREBASE_AUTH.getCurrentUser().getDisplayName() + ".");
             txtViewLogin.setText("Logout");
             txtViewLogin.setOnClickListener(new View.OnClickListener() {
                 @Override
