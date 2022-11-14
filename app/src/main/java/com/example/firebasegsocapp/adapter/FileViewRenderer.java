@@ -59,6 +59,7 @@ public class FileViewRenderer extends ViewRenderer<FirebaseFile, FileViewHolder>
         fileExtensionImages = new HashMap<String, Bitmap>(FIREBASE_FILES_SERVICE.getFileExtensionsImages());
         fileExtensionsMimes = new HashMap<String, String>(FIREBASE_FILES_SERVICE.getFileExtensionsMimes());
         progressDialog = new ProgressDialog(context);
+        progressDialog.setCancelable(false);
     }
 
     @Override public

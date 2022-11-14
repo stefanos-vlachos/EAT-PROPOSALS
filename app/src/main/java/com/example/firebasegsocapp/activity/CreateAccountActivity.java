@@ -67,6 +67,7 @@ public class CreateAccountActivity extends AppCompatActivity {
 
     private void init() {
         progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
         firebaseAuth = getFirebaseAuth();
         txtViewCancelCreation = findViewById(R.id.txtViewCancelCreation);
         edtTextCreationUsername = findViewById(R.id.edtTextAccCreationUsername);

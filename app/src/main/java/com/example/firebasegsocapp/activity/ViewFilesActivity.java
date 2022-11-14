@@ -64,6 +64,7 @@ public class ViewFilesActivity<T extends FirebaseReference> extends AppCompatAct
     private void init(){
         openFolder="accepted-files";
         progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
         progressDialog.setMessage("Loading files...");
         storageReference = getStorageReference();
         firebaseReferences = new ArrayList<>();

@@ -41,6 +41,7 @@ public class FolderViewRenderer extends ViewRenderer<FirebaseFolder, FolderViewH
     public FolderViewRenderer(final int type, final Context context) {
         super(type, context);
         progressDialog = new ProgressDialog(context);
+        progressDialog.setCancelable(false);
     }
 
     @NonNull

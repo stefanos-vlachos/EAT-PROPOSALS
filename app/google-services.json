@@ -8,6 +8,43 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:489697442067:android:ec90b75fc130187d7c02e6",
+        "android_client_info": {
+          "package_name": "com.eatproposals.eatapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "489697442067-v1nqni8c4nf7jer9tqit63ou3v4eg7od.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.eatproposals.eatapp",
+            "certificate_hash": "418009051a184ff86d5ba3a1cbf522ce3336dbd1"
+          }
+        },
+        {
+          "client_id": "489697442067-qq7iqnt93q51q7tkg7ivur2ivtongk64.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGmY7DEBHFTPh_37_H5hcX1ztyQhPkPkc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "489697442067-qq7iqnt93q51q7tkg7ivur2ivtongk64.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:489697442067:android:46ce14035d07a7fb7c02e6",
         "android_client_info": {
           "package_name": "com.example.firebasegsocapp"

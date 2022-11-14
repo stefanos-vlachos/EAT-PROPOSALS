@@ -60,6 +60,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void init() {
         progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
         firebaseAuth = MainActivity.getFirebaseAuth();
         txtViewCancelLogin = findViewById(R.id.txtViewCancelLogin);
         txtViewLoginTitle = findViewById(R.id.txtViewLoginTitle);
@@ -99,6 +100,7 @@ public class LoginActivity extends AppCompatActivity {
                 String password = edtTextLoginPassword.getText().toString();
                 if(checkUserInput(username, password)) {
                     progressDialog.setMessage("Logging in ...");
+
                     progressDialog.show();
                     signIn(username, password);
                 }

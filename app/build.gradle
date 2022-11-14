@@ -12,7 +12,7 @@ android {
     buildToolsVersion "32.0.0"
 
     defaultConfig {
-        applicationId "com.example.firebasegsocapp"
+        applicationId "com.eatproposals.eatapp"
         minSdkVersion 24
         targetSdkVersion 32
         versionCode 1
