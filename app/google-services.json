@@ -79,6 +79,43 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:489697442067:android:7c1647d6e47f38e57c02e6",
+        "android_client_info": {
+          "package_name": "edu.eatproposals.eatapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "489697442067-vbo1o1bc8omv47g98dbp0icp8fvivdg1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "edu.eatproposals.eatapp",
+            "certificate_hash": "418009051a184ff86d5ba3a1cbf522ce3336dbd1"
+          }
+        },
+        {
+          "client_id": "489697442067-qq7iqnt93q51q7tkg7ivur2ivtongk64.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGmY7DEBHFTPh_37_H5hcX1ztyQhPkPkc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "489697442067-qq7iqnt93q51q7tkg7ivur2ivtongk64.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"
